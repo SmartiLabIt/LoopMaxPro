@@ -1,0 +1,84 @@
+{
+  "name": "meteowifi",
+  "kind": "online",
+  "title": "MeteoWifi",
+  "version": "1.0.4",
+  "icon": "🌤",
+  "uiApi": 1,
+  "ui": "ui/meteowifi.js",
+  "params": {
+    "sda": -1,
+    "scl": -1,
+    "sda2": -1,
+    "scl2": -1,
+    "address": 60
+  },
+  "requires": [
+    "net",
+    "httpclient",
+    "bus",
+    "config"
+  ],
+  "optional": [
+    "geo",
+    "clock"
+  ],
+  "online": [
+    "api.open-meteo.com",
+    "geocoding-api.open-meteo.com"
+  ],
+  "pinParams": {
+    "sda": [
+      "SDA"
+    ],
+    "scl": [
+      "SCL"
+    ],
+    "sda2": [
+      "SDA, second place"
+    ],
+    "scl2": [
+      "SCL, second place"
+    ]
+  },
+  "families": [
+    "esp32",
+    "esp8266"
+  ],
+  "boardPins": {
+    "esp8266": {
+      "sda": 4,
+      "scl": 5
+    },
+    "board:esp8266_nodemcu": {
+      "sda2": 14,
+      "scl2": 12
+    },
+    "native": {
+      "sda": 30,
+      "scl": 31,
+      "sda2": 32,
+      "scl2": 33
+    }
+  },
+  "pinOptional": [
+    "sda",
+    "scl",
+    "sda2",
+    "scl2"
+  ],
+  "pinAlternative": [
+    "sda2",
+    "scl2"
+  ],
+  "pinBus": {
+    "sda": "i2c",
+    "scl": "i2c",
+    "sda2": "i2c",
+    "scl2": "i2c"
+  },
+  "defaultBoard": "esp8266_nodemcu",
+  "sources": [
+    "src"
+  ]
+}

@@ -1,0 +1,218 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 942" role="img" aria-label="LoopMaxPro architecture: the layers from the board to the modules, the doors that lead to one command bus, and what you add">
+<title>LoopMaxPro architecture: the layers from the board to the modules, the doors that lead to one command bus, and what you add</title>
+<defs><linearGradient id="brand" gradientUnits="userSpaceOnUse" x1="0" x2="29739" y1="0" y2="0"><stop offset="0" stop-color="#0891b2"/><stop offset="1" stop-color="#6366f1"/></linearGradient><marker id="m6366f1" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6366f1"/></marker><marker id="mf97316" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#f97316"/></marker></defs>
+<rect x="1" y="1" width="1198" height="940" rx="18" fill="#ffffff" stroke="#d8dee6" stroke-width="2"/>
+<g transform="translate(40 34) scale(0.0191982) translate(0 -477)"><path fill="url(#brand)" d="M1468 2027H282Q254 2027 230 2017Q206 2007 188 1990Q171 1972 161 1948Q151 1924 151 1896V593H411V1767H1468ZM2806 1662Q2806 1729 2789 1782Q2772 1836 2744 1876Q2716 1917 2679 1946Q2642 1974 2602 1992Q2561 2010 2520 2018Q2478 2027 2441 2027H1972Q1918 2027 1854 2008Q1790 1989 1736 1946Q1681 1902 1644 1832Q1608 1763 1608 1662V1310Q1608 1210 1644 1140Q1681 1071 1736 1028Q1790 984 1854 965Q1918 946 1972 946H2441Q2541 946 2611 982Q2681 1018 2724 1072Q2767 1127 2786 1191Q2806 1255 2806 1310ZM2546 1312Q2546 1258 2519 1232Q2492 1206 2441 1206H1974Q1922 1206 1895 1232Q1868 1259 1868 1310V1662Q1868 1713 1895 1740Q1922 1767 1974 1767H2441Q2494 1767 2520 1740Q2546 1713 2546 1662ZM4203 1662Q4203 1729 4186 1782Q4169 1836 4141 1876Q4113 1917 4076 1946Q4039 1974 3998 1992Q3958 2010 3916 2018Q3875 2027 3838 2027H3369Q3315 2027 3251 2008Q3187 1989 3132 1946Q3078 1902 3042 1832Q3005 1763 3005 1662V1310Q3005 1210 3042 1140Q3078 1071 3132 1028Q3187 984 3251 965Q3315 946 3369 946H3838Q3938 946 4008 982Q4078 1018 4121 1072Q4164 1127 4184 1191Q4203 1255 4203 1310ZM3943 1312Q3943 1258 3916 1232Q3889 1206 3838 1206H3371Q3319 1206 3292 1232Q3265 1259 3265 1310V1662Q3265 1713 3292 1740Q3319 1767 3371 1767H3838Q3891 1767 3917 1740Q3943 1713 3943 1662ZM5616 1662Q5616 1729 5599 1782Q5582 1836 5554 1876Q5526 1917 5489 1946Q5452 1974 5412 1992Q5371 2010 5330 2018Q5289 2027 5252 2027H4783V1767H5252Q5304 1767 5330 1740Q5356 1713 5356 1662V1312Q5356 1258 5330 1232Q5303 1206 5252 1206H4785Q4732 1206 4705 1232Q4678 1259 4678 1310V2365H4418V1310Q4418 1243 4435 1190Q4452 1137 4480 1096Q4509 1056 4546 1028Q4583 999 4624 981Q4664 963 4706 954Q4747 946 4783 946H5252Q5319 946 5372 963Q5425 980 5466 1008Q5506 1036 5534 1073Q5563 1110 5581 1150Q5599 1191 5608 1232Q5616 1273 5616 1310ZM7536 2027H7274V1173L6813 1984Q6796 2015 6766 2031Q6735 2047 6700 2047Q6666 2047 6636 2031Q6607 2015 6590 1984L6127 1173V2027H5867V704Q5867 659 5894 624Q5920 589 5963 577Q5984 572 6005 574Q6026 575 6046 582Q6065 590 6081 604Q6097 617 6108 636L6700 1665L7292 636Q7315 598 7356 582Q7396 566 7440 577Q7482 589 7509 624Q7536 659 7536 704ZM8925 1669Q8925 1723 8906 1786Q8887 1848 8844 1902Q8802 1955 8734 1991Q8665 2027 8567 2027H8098Q8044 2027 7982 2008Q7919 1989 7866 1946Q7812 1904 7776 1836Q7740 1767 7740 1669Q7740 1615 7759 1552Q7778 1489 7820 1436Q7863 1382 7932 1346Q8000 1310 8098 1310H8567V1558H8098Q8045 1558 8016 1590Q7987 1623 7987 1671Q7987 1722 8020 1750Q8054 1779 8100 1779H8567Q8620 1779 8649 1747Q8678 1715 8678 1667V1304Q8678 1253 8646 1223Q8615 1193 8567 1193H7996V946H8567Q8621 946 8684 965Q8746 984 8800 1026Q8853 1069 8889 1138Q8925 1206 8925 1304ZM10382 946 9915 1456 10441 2027H10083L9737 1650L9391 2027H9032L9557 1454L9092 946H9448L9735 1259L10024 946Z"/><path fill="#f97316" d="M12029 1193Q12029 1282 12007 1352Q11985 1422 11948 1476Q11910 1529 11861 1567Q11812 1605 11758 1629Q11705 1653 11650 1664Q11596 1675 11548 1675H10960V1415H11548Q11598 1411 11638 1394Q11679 1378 11708 1350Q11737 1322 11753 1282Q11769 1243 11769 1193V1075Q11764 1026 11748 985Q11732 944 11704 915Q11677 886 11638 870Q11599 853 11548 853H10962Q10910 853 10883 880Q10856 907 10856 958V2027H10596V958Q10596 858 10632 788Q10669 718 10724 675Q10778 632 10842 612Q10906 593 10960 593H11548Q11636 593 11706 616Q11776 638 11830 676Q11883 713 11920 762Q11958 811 11982 864Q12007 918 12018 972Q12029 1027 12029 1075ZM13168 1206H12583Q12530 1206 12503 1232Q12476 1259 12476 1310V2027H12216V1310Q12216 1243 12233 1190Q12250 1137 12278 1096Q12307 1056 12344 1028Q12381 999 12422 981Q12462 963 12504 954Q12545 946 12581 946H13168ZM14515 1662Q14515 1729 14498 1782Q14481 1836 14453 1876Q14425 1917 14388 1946Q14351 1974 14310 1992Q14270 2010 14228 2018Q14187 2027 14150 2027H13681Q13627 2027 13563 2008Q13499 1989 13444 1946Q13390 1902 13354 1832Q13317 1763 13317 1662V1310Q13317 1210 13354 1140Q13390 1071 13444 1028Q13499 984 13563 965Q13627 946 13681 946H14150Q14250 946 14320 982Q14390 1018 14433 1072Q14476 1127 14496 1191Q14515 1255 14515 1310ZM14255 1312Q14255 1258 14228 1232Q14201 1206 14150 1206H13683Q13631 1206 13604 1232Q13577 1259 13577 1310V1662Q13577 1713 13604 1740Q13631 1767 13683 1767H14150Q14203 1767 14229 1740Q14255 1713 14255 1662Z"/><path fill="url(#brand)" d="M16518 1669Q16518 1723 16499 1786Q16480 1848 16438 1902Q16395 1955 16326 1991Q16258 2027 16160 2027H15691Q15637 2027 15574 2008Q15512 1989 15458 1946Q15405 1904 15369 1836Q15333 1767 15333 1669Q15333 1615 15352 1552Q15371 1489 15414 1436Q15456 1382 15524 1346Q15593 1310 15691 1310H16160V1558H15691Q15638 1558 15609 1590Q15580 1623 15580 1671Q15580 1722 15614 1750Q15647 1779 15693 1779H16160Q16213 1779 16242 1747Q16271 1715 16271 1667V1304Q16271 1253 16240 1223Q16208 1193 16160 1193H15589V946H16160Q16214 946 16276 965Q16339 984 16392 1026Q16446 1069 16482 1138Q16518 1206 16518 1304ZM17686 1206H17101Q17048 1206 17021 1232Q16994 1259 16994 1310V2027H16734V1310Q16734 1243 16751 1190Q16768 1137 16796 1096Q16825 1056 16862 1028Q16899 999 16940 981Q16980 963 17022 954Q17063 946 17099 946H17686ZM18904 2027H18199Q18145 2027 18081 2008Q18017 1989 17962 1946Q17908 1902 17872 1832Q17835 1763 17835 1662V1310Q17835 1273 17844 1232Q17852 1191 17870 1150Q17888 1110 17916 1073Q17945 1036 17986 1008Q18026 980 18079 963Q18132 946 18199 946H18904V1206H18199Q18148 1206 18122 1232Q18095 1258 18095 1312V1662Q18095 1713 18122 1740Q18149 1767 18201 1767H18904ZM20321 2027H20061V1310Q20061 1259 20035 1232Q20009 1206 19957 1206H19488V946H19957Q19994 946 20035 954Q20076 963 20116 981Q20157 999 20194 1028Q20231 1056 20259 1096Q20287 1137 20304 1190Q20321 1243 20321 1310ZM19383 2027H19123V489H19383ZM20823 724H20563V489H20823ZM20823 2027H20563V946H20823ZM22055 1206H21601V2027H21338V1206H21000V946H21338V593H21601V946H22055ZM23389 1304Q23389 1358 23370 1420Q23351 1483 23308 1536Q23266 1590 23198 1626Q23129 1662 23031 1662H22562V1415H23031Q23084 1415 23113 1382Q23142 1350 23142 1302Q23142 1251 23110 1222Q23077 1193 23031 1193H22562Q22509 1193 22480 1226Q22451 1258 22451 1306V1669Q22451 1721 22484 1750Q22516 1779 22564 1779H23031V2027H22562Q22508 2027 22446 2008Q22383 1989 22330 1946Q22276 1904 22240 1836Q22204 1767 22204 1669V1304Q22204 1250 22223 1188Q22242 1125 22284 1072Q22327 1018 22396 982Q22464 946 22562 946H23031Q23085 946 23148 965Q23210 984 23264 1026Q23317 1069 23353 1138Q23389 1206 23389 1304ZM24611 2027H23906Q23852 2027 23788 2008Q23724 1989 23670 1946Q23615 1902 23578 1832Q23542 1763 23542 1662V1310Q23542 1273 23550 1232Q23559 1191 23577 1150Q23595 1110 23624 1073Q23652 1036 23692 1008Q23733 980 23786 963Q23839 946 23906 946H24611V1206H23906Q23855 1206 23828 1232Q23802 1258 23802 1312V1662Q23802 1713 23829 1740Q23856 1767 23908 1767H24611ZM25809 1206H25355V2027H25092V1206H24754V946H25092V593H25355V946H25809ZM27162 1896Q27162 1924 27152 1948Q27142 1972 27124 1990Q27107 2007 27084 2017Q27060 2027 27033 2027H26445Q26397 2027 26342 2016Q26288 2005 26235 1980Q26182 1956 26132 1918Q26083 1881 26046 1828Q26009 1774 25986 1704Q25964 1634 25964 1546V946H26224V1546Q26224 1597 26242 1638Q26259 1678 26289 1707Q26319 1736 26360 1752Q26400 1767 26447 1767H26902V946H27162ZM28352 1206H27767Q27714 1206 27687 1232Q27660 1259 27660 1310V2027H27400V1310Q27400 1243 27417 1190Q27434 1137 27462 1096Q27491 1056 27528 1028Q27565 999 27606 981Q27646 963 27688 954Q27729 946 27765 946H28352ZM29686 1304Q29686 1358 29667 1420Q29648 1483 29606 1536Q29563 1590 29494 1626Q29426 1662 29328 1662H28859V1415H29328Q29381 1415 29410 1382Q29439 1350 29439 1302Q29439 1251 29406 1222Q29374 1193 29328 1193H28859Q28806 1193 28777 1226Q28748 1258 28748 1306V1669Q28748 1721 28780 1750Q28813 1779 28861 1779H29328V2027H28859Q28805 2027 28742 2008Q28680 1989 28626 1946Q28573 1904 28537 1836Q28501 1767 28501 1669V1304Q28501 1250 28520 1188Q28539 1125 28582 1072Q28624 1018 28692 982Q28761 946 28859 946H29328Q29382 946 29444 965Q29507 984 29560 1026Q29614 1069 29650 1138Q29686 1206 29686 1304Z"/></g>
+<text x="40" y="104" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="16" font-weight="400" fill="#475569" text-anchor="start">The same layers on every board. A module on top makes the device. Orange, dashed: what you add.</text>
+<rect x="40" y="128" width="760" height="126" rx="14" fill="#eaf8ef" stroke="#22a35a" stroke-width="2"/>
+<text x="58" y="160" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="21" font-weight="700" fill="#166534" text-anchor="start">Modules</text>
+<text x="58" y="182" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">what the device is for,</text>
+<text x="58" y="199" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">chosen at build time</text>
+<text x="58" y="240" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#166534" text-anchor="start">src/modules/</text>
+<rect x="214" y="142" width="81" height="28" rx="14" fill="#ffffff" stroke="#22a35a" stroke-width="1.6"/>
+<text x="254.5" y="160.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">EspRadio</text>
+<rect x="303" y="142" width="67" height="28" rx="14" fill="#ffffff" stroke="#22a35a" stroke-width="1.6"/>
+<text x="336.5" y="160.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">ExpNet</text>
+<rect x="378" y="142" width="89" height="28" rx="14" fill="#ffffff" stroke="#22a35a" stroke-width="1.6"/>
+<text x="422.5" y="160.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">GanjaLeaf</text>
+<rect x="475" y="142" width="89" height="28" rx="14" fill="#ffffff" stroke="#22a35a" stroke-width="1.6"/>
+<text x="519.5" y="160.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">MeteoWifi</text>
+<rect x="572" y="142" width="126" height="28" rx="14" fill="#ffffff" stroke="#22a35a" stroke-width="1.6"/>
+<text x="635" y="160.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">RGB Controller</text>
+<rect x="706" y="142" width="74" height="28" rx="14" fill="#ffffff" stroke="#22a35a" stroke-width="1.6"/>
+<text x="743" y="160.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">Zappy 2</text>
+<rect x="214" y="178" width="119" height="28" rx="14" fill="#fff3ea" stroke="#f97316" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="273.5" y="196.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#9a3412" text-anchor="middle">+ your module</text>
+<rect x="341" y="178" width="208" height="28" rx="14" fill="#fff3ea" stroke="#f97316" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="445" y="196.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#9a3412" text-anchor="middle">+ your bridge to a server</text>
+<text x="216" y="234" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">five kinds: hardware · online · bridge · ui · headless</text>
+<rect x="40" y="266" width="760" height="108" rx="14" fill="#f3edff" stroke="#8b5cf6" stroke-width="2"/>
+<text x="58" y="298" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="21" font-weight="700" fill="#5b21b6" text-anchor="start">SDK</text>
+<text x="58" y="320" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">what a module is</text>
+<text x="58" y="337" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">written with</text>
+<text x="58" y="360" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#5b21b6" text-anchor="start">src/sdk/</text>
+<rect x="214" y="284" width="67" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="247.5" y="302.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">Module</text>
+<rect x="289" y="284" width="59" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="318.5" y="302.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">State</text>
+<rect x="356" y="284" width="111" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="411.5" y="302.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">ModuleConfig</text>
+<rect x="475" y="284" width="74" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="512" y="302.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">PinBank</text>
+<rect x="557" y="284" width="104" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="609" y="302.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">PinSchedule</text>
+<rect x="669" y="284" width="67" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="702.5" y="302.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">Lights</text>
+<rect x="214" y="320" width="67" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="247.5" y="338.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">Things</text>
+<rect x="289" y="320" width="52" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="315" y="338.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">Http</text>
+<rect x="349" y="320" width="67" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="382.5" y="338.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">Button</text>
+<rect x="424" y="320" width="67" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="457.5" y="338.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">Poller</text>
+<rect x="499" y="320" width="89" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="543.5" y="338.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">I2cDevice</text>
+<rect x="596" y="320" width="111" height="28" rx="14" fill="#ffffff" stroke="#8b5cf6" stroke-width="1.6"/>
+<text x="651.5" y="338.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#5b21b6" text-anchor="middle">OnlineSource</text>
+<rect x="40" y="386" width="760" height="134" rx="14" fill="#e9f1ff" stroke="#3b82f6" stroke-width="2"/>
+<text x="58" y="418" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="21" font-weight="700" fill="#1e40af" text-anchor="start">Services</text>
+<text x="58" y="440" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">the system itself: each</text>
+<text x="58" y="457" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">one a target with its</text>
+<text x="58" y="474" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">commands</text>
+<text x="58" y="506" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#1e40af" text-anchor="start">src/services/</text>
+<rect x="214" y="400" width="70" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="249" y="418.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">system</text>
+<rect x="292" y="400" width="46" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="315" y="418.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">log</text>
+<rect x="346" y="400" width="70" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="381" y="418.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">serial</text>
+<rect x="424" y="400" width="78" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="463" y="418.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">storage</text>
+<rect x="510" y="400" width="70" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="545" y="418.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">config</text>
+<rect x="588" y="400" width="54" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="615" y="418.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">gpio</text>
+<rect x="650" y="400" width="46" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="673" y="418.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">bus</text>
+<rect x="704" y="400" width="62" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="735" y="418.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">clock</text>
+<rect x="214" y="436" width="62" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="245" y="454.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">reset</text>
+<rect x="284" y="436" width="46" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="307" y="454.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">net</text>
+<rect x="338" y="436" width="46" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="361" y="454.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">web</text>
+<rect x="392" y="436" width="101" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="442.5" y="454.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">httpclient</text>
+<rect x="501" y="436" width="62" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="532" y="454.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">probe</text>
+<rect x="571" y="436" width="54" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="598" y="454.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">mqtt</text>
+<rect x="633" y="436" width="46" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="656" y="454.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">ota</text>
+<rect x="687" y="436" width="46" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="710" y="454.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">geo</text>
+<rect x="214" y="472" width="62" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="245" y="490.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">cloud</text>
+<rect x="284" y="472" width="54" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="311" y="490.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">lora</text>
+<rect x="346" y="472" width="78" height="28" rx="14" fill="#ffffff" stroke="#3b82f6" stroke-width="1.6"/>
+<text x="385" y="490.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">modules</text>
+<rect x="544" y="472" width="222" height="28" rx="14" fill="#fff3ea" stroke="#f97316" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="655" y="490.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#9a3412" text-anchor="middle">+ a service of your product</text>
+<rect x="40" y="532" width="760" height="108" rx="14" fill="#eef0ff" stroke="#6366f1" stroke-width="2"/>
+<text x="58" y="564" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="21" font-weight="700" fill="#3730a3" text-anchor="start">Kernel</text>
+<text x="58" y="586" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">one application task:</text>
+<text x="58" y="603" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">no locks in a module</text>
+<text x="58" y="626" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#3730a3" text-anchor="start">src/kernel/</text>
+<rect x="214" y="550" width="104" height="28" rx="14" fill="#dfe3ff" stroke="#6366f1" stroke-width="1.6"/>
+<text x="266" y="568.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#3730a3" text-anchor="middle">Command bus</text>
+<rect x="326" y="550" width="89" height="28" rx="14" fill="#dfe3ff" stroke="#6366f1" stroke-width="1.6"/>
+<text x="370.5" y="568.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#3730a3" text-anchor="middle">Event bus</text>
+<rect x="430" y="550" width="141" height="28" rx="14" fill="#ffffff" stroke="#6366f1" stroke-width="1.6"/>
+<text x="500.5" y="568.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#3730a3" text-anchor="middle">Service registry</text>
+<rect x="579" y="550" width="81" height="28" rx="14" fill="#ffffff" stroke="#6366f1" stroke-width="1.6"/>
+<text x="619.5" y="568.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#3730a3" text-anchor="middle">Settings</text>
+<rect x="668" y="550" width="67" height="28" rx="14" fill="#ffffff" stroke="#6366f1" stroke-width="1.6"/>
+<text x="701.5" y="568.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#3730a3" text-anchor="middle">Logger</text>
+<rect x="214" y="586" width="67" height="28" rx="14" fill="#ffffff" stroke="#6366f1" stroke-width="1.6"/>
+<text x="247.5" y="604.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#3730a3" text-anchor="middle">Worker</text>
+<rect x="289" y="586" width="111" height="28" rx="14" fill="#ffffff" stroke="#6366f1" stroke-width="1.6"/>
+<text x="344.5" y="604.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#3730a3" text-anchor="middle">Field tables</text>
+<rect x="408" y="586" width="200" height="28" rx="14" fill="#ffffff" stroke="#6366f1" stroke-width="1.6"/>
+<text x="508" y="604.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#3730a3" text-anchor="middle">JSON only at the borders</text>
+<rect x="40" y="652" width="760" height="164" rx="14" fill="#e5f7fb" stroke="#0891b2" stroke-width="2"/>
+<text x="58" y="684" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="21" font-weight="700" fill="#155e75" text-anchor="start">HAL</text>
+<text x="58" y="706" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">one set of interfaces,</text>
+<text x="58" y="723" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">one implementation</text>
+<text x="58" y="740" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">for each build</text>
+<text x="58" y="802" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="12.5" font-weight="400" fill="#155e75" text-anchor="start">src/hal/</text>
+<rect x="214" y="666" width="65" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="246.5" y="684.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">system</text>
+<rect x="287" y="666" width="58" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="316" y="684.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">clock</text>
+<rect x="353" y="666" width="65" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="385.5" y="684.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">serial</text>
+<rect x="426" y="666" width="58" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="455" y="684.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">tasks</text>
+<rect x="492" y="666" width="51" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="517.5" y="684.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">pins</text>
+<rect x="551" y="666" width="58" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="580" y="684.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">buses</text>
+<rect x="617" y="666" width="72" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="653" y="684.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">storage</text>
+<rect x="697" y="666" width="65" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="729.5" y="684.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">update</text>
+<rect x="214" y="702" width="72" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="250" y="720.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">network</text>
+<rect x="294" y="702" width="51" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="319.5" y="720.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">HTTP</text>
+<rect x="353" y="702" width="58" height="28" rx="14" fill="#ffffff" stroke="#0891b2" stroke-width="1.6"/>
+<text x="382" y="720.55" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#155e75" text-anchor="middle">radio</text>
+<text x="440" y="721" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">the only layer that knows the chip it runs on</text>
+<rect x="214" y="742" width="341" height="28" rx="14" fill="#cdeef6" stroke="#0891b2" stroke-width="1.6"/>
+<text x="384.5" y="760.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#155e75" text-anchor="middle">ESP32 family: Arduino and ESP-IDF, one code</text>
+<rect x="563" y="742" width="141" height="28" rx="14" fill="#cdeef6" stroke="#0891b2" stroke-width="1.6"/>
+<text x="633.5" y="760.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#155e75" text-anchor="middle">ESP8266: Arduino</text>
+<rect x="214" y="778" width="193" height="28" rx="14" fill="#cdeef6" stroke="#0891b2" stroke-width="1.6"/>
+<text x="310.5" y="796.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#155e75" text-anchor="middle">PC: simulator and tests</text>
+<rect x="410" y="778" width="230" height="28" rx="14" fill="#fff3ea" stroke="#f97316" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="525" y="796.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#9a3412" text-anchor="middle">+ a new board or chip family</text>
+<rect x="40" y="828" width="760" height="62" rx="14" fill="#f3f5f8" stroke="#94a3b8" stroke-width="2"/>
+<text x="58" y="860" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="21" font-weight="700" fill="#334155" text-anchor="start">Boards</text>
+<rect x="214" y="845" width="59" height="28" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="243.5" y="863.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#334155" text-anchor="middle">ESP32</text>
+<rect x="281" y="845" width="37" height="28" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="299.5" y="863.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#334155" text-anchor="middle">S2</text>
+<rect x="326" y="845" width="37" height="28" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="344.5" y="863.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#334155" text-anchor="middle">S3</text>
+<rect x="371" y="845" width="37" height="28" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="389.5" y="863.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#334155" text-anchor="middle">C3</text>
+<rect x="416" y="845" width="37" height="28" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="434.5" y="863.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#334155" text-anchor="middle">C6</text>
+<rect x="461" y="845" width="141" height="28" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="531.5" y="863.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#334155" text-anchor="middle">Heltec V3 + LoRa</text>
+<rect x="610" y="845" width="74" height="28" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="647" y="863.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#334155" text-anchor="middle">ESP8266</text>
+<rect x="692" y="845" width="37" height="28" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.6"/>
+<text x="710.5" y="863.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#334155" text-anchor="middle">PC</text>
+<text x="840" y="148" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="#0f172a" text-anchor="start">One command, any door</text>
+<text x="840" y="170" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">the same documents and commands, whoever asks</text>
+<rect x="840" y="186" width="320" height="52" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+<text x="854" y="209" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start">Web console</text>
+<text x="854" y="228" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">in the browser, served by the device</text>
+<rect x="840" y="246" width="320" height="52" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+<text x="854" y="269" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start">HTTP API</text>
+<text x="854" y="288" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">documents, commands, events</text>
+<rect x="840" y="306" width="320" height="52" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+<text x="854" y="329" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start">Serial console</text>
+<text x="854" y="348" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">the command line on the USB port</text>
+<rect x="840" y="366" width="320" height="52" rx="10" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+<text x="854" y="389" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start">MQTT</text>
+<text x="854" y="408" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">a broker, and Home Assistant through it</text>
+<rect x="840" y="426" width="320" height="52" rx="10" fill="#ffffff" stroke="#f97316" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="854" y="449" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#9a3412" text-anchor="start">Cloud bridge</text>
+<text x="854" y="468" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">a module carries them to a server</text>
+<path d="M1000 478 L1000 528" fill="none" stroke="#6366f1" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#m6366f1)"/>
+<rect x="840" y="532" width="320" height="108" rx="12" fill="#eef0ff" stroke="#6366f1" stroke-width="2"/>
+<text x="854" y="564" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="#3730a3" text-anchor="start">Command bus</text>
+<text x="854" y="588" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#0f172a" text-anchor="start">checks the arguments, logs who asked,</text>
+<text x="854" y="605" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#0f172a" text-anchor="start">calls one handler. An event then tells</text>
+<text x="854" y="622" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#0f172a" text-anchor="start">every door what changed.</text>
+<path d="M836 566 L804 566" fill="none" stroke="#6366f1" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#m6366f1)"/>
+<path d="M804 606 L836 606" fill="none" stroke="#6366f1" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#m6366f1)"/>
+<rect x="840" y="664" width="320" height="226" rx="12" fill="#fff3ea" stroke="#f97316" stroke-width="2" stroke-dasharray="7 5"/>
+<text x="854" y="698" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="19" font-weight="700" fill="#9a3412" text-anchor="start">Your server</text>
+<text x="974" y="698" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="start">optional</text>
+<text x="854" y="726" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">A bridge is a module you write: it</text>
+<text x="854" y="745" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">carries the same documents and</text>
+<text x="854" y="764" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">commands to a server of yours.</text>
+<text x="854" y="798" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">The page of a module is one file. It</text>
+<text x="854" y="817" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">runs in the console of the device and,</text>
+<text x="854" y="836" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">unchanged, in a console on your</text>
+<text x="854" y="855" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">server: the same device, from far away.</text>
+<path d="M1160 452 L1180 452 L1180 720 L1164 720" fill="none" stroke="#f97316" stroke-width="2" stroke-linejoin="round" stroke-dasharray="6 4" marker-end="url(#mf97316)"/>
+<rect x="40" y="906" width="34" height="20" rx="10" fill="#fff3ea" stroke="#f97316" stroke-width="1.6" stroke-dasharray="5 4"/>
+<text x="84" y="921" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#475569" text-anchor="start">what you add: a module, a bridge, a service of your product, a board, a server. Nothing else changes.</text>
+</svg>

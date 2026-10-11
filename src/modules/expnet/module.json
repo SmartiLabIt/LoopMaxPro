@@ -1,0 +1,45 @@
+{
+  "name": "expnet",
+  "kind": "online",
+  "title": "ExpNet",
+  "version": "1.0.4",
+  "icon": "🧰",
+  "uiApi": 1,
+  "ui": "ui/expnet.js",
+  "params": {},
+  "requires": [
+    "net",
+    "probe",
+    "httpclient",
+    "config"
+  ],
+  "optional": [
+    "clock",
+    "mqtt"
+  ],
+  "online": [
+    "api.telegram.org"
+  ],
+  "pinParams": {},
+  "families": [
+    "esp32"
+  ],
+  "editions": [
+    "normal"
+  ],
+  "defaultBoard": "esp32dev",
+  "boardNotes": {
+    "esp32c3": "It works, within the limits of the smaller memory (128 devices, one sample a second): for ExpNet at least a classic ESP32 is recommended.",
+    "esp32c3_usb": "It works, within the limits of the smaller memory (128 devices, one sample a second): for ExpNet at least a classic ESP32 is recommended."
+  },
+  "tune": {
+    "esp32c3": {
+      "LMP_WIFI_DYNAMIC_TX_BUFFERS": 16,
+      "LMP_WIFI_DYNAMIC_RX_BUFFERS": 16,
+      "LMP_GEO_HTTP": 1
+    }
+  },
+  "sources": [
+    "src"
+  ]
+}

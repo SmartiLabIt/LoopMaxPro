@@ -1,0 +1,102 @@
+{
+  "name": "ganjaleaf",
+  "kind": "hardware",
+  "title": "GanjaLeaf",
+  "version": "1.0.1",
+  "icon": "🌿",
+  "uiApi": 1,
+  "ui": "../../sdk/ui/lights.js",
+  "params": {
+    "leaf": [
+      -1,
+      -1,
+      -1
+    ],
+    "ring": -1,
+    "leds": 12
+  },
+  "requires": [
+    "gpio",
+    "config"
+  ],
+  "optional": [
+    "clock"
+  ],
+  "online": [],
+  "pinParams": {
+    "leaf": [
+      "Leaf R",
+      "Leaf G",
+      "Leaf B"
+    ],
+    "ring": [
+      "Ring"
+    ]
+  },
+  "families": [
+    "esp32"
+  ],
+  "image": "docs/mascot.webp",
+  "boardPins": {
+    "esp32": {
+      "leaf": [
+        25,
+        26,
+        27
+      ],
+      "ring": 23
+    },
+    "esp32s2": {
+      "leaf": [
+        5,
+        6,
+        7
+      ],
+      "ring": 10
+    },
+    "esp32s3": {
+      "leaf": [
+        5,
+        6,
+        7
+      ],
+      "ring": 10
+    },
+    "esp32c3": {
+      "leaf": [
+        5,
+        6,
+        7
+      ],
+      "ring": 10
+    },
+    "esp32c6": {
+      "leaf": [
+        5,
+        6,
+        7
+      ],
+      "ring": 10
+    },
+    "board:heltec_v3": {
+      "leaf": [
+        5,
+        6,
+        7
+      ],
+      "ring": 4
+    },
+    "native": {
+      "leaf": [
+        46,
+        47,
+        48
+      ],
+      "ring": 49
+    }
+  },
+  "defaultBoard": "esp32c3_usb",
+  "sources": [
+    "src"
+  ]
+}

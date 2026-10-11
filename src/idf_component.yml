@@ -1,0 +1,8 @@
+# LoopMaxPro - components that ESP-IDF downloads for its builds.
+dependencies:
+  # The same filesystem the Arduino builds use.
+  joltwallet/littlefs: "^1.20.0"
+  # Names on the local network, host.local: since version 5 it is no longer part of ESP-IDF.
+  espressif/mdns: "^1.8.0"
+  # Messages through a broker: since version 6 it is no longer part of ESP-IDF.
+  espressif/mqtt: "^1.0.0"

@@ -1,0 +1,91 @@
+{
+  "name": "rgb",
+  "kind": "hardware",
+  "title": "RGB Controller",
+  "version": "1.0.1",
+  "icon": "🌈",
+  "uiApi": 1,
+  "ui": "../../sdk/ui/lights.js",
+  "params": {
+    "pins": [
+      -1,
+      -1,
+      -1
+    ]
+  },
+  "requires": [
+    "gpio",
+    "config"
+  ],
+  "optional": [
+    "clock"
+  ],
+  "online": [],
+  "pinParams": {
+    "pins": [
+      "R",
+      "G",
+      "B"
+    ]
+  },
+  "families": [
+    "esp32",
+    "esp8266"
+  ],
+  "image": "docs/circuit-built.png",
+  "boardPins": {
+    "esp32": {
+      "pins": [
+        25,
+        26,
+        27
+      ]
+    },
+    "esp32s2": {
+      "pins": [
+        5,
+        6,
+        7
+      ]
+    },
+    "esp32s3": {
+      "pins": [
+        5,
+        6,
+        7
+      ]
+    },
+    "esp32c3": {
+      "pins": [
+        5,
+        6,
+        7
+      ]
+    },
+    "esp32c6": {
+      "pins": [
+        5,
+        6,
+        7
+      ]
+    },
+    "esp8266": {
+      "pins": [
+        12,
+        13,
+        14
+      ]
+    },
+    "native": {
+      "pins": [
+        43,
+        44,
+        45
+      ]
+    }
+  },
+  "defaultBoard": "esp32c3_usb",
+  "sources": [
+    "src"
+  ]
+}

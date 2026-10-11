@@ -1,0 +1,33 @@
+{
+  "name": "espradio",
+  "kind": "online",
+  "title": "EspRadio",
+  "version": "1.0.3",
+  "icon": "📻",
+  "uiApi": 1,
+  "ui": "ui/espradio.js",
+  "params": {},
+  "requires": [
+    "config"
+  ],
+  "optional": [
+    "geo"
+  ],
+  "online": [
+    "api.radio-browser.info",
+    "somafm.com",
+    "api.laut.fm"
+  ],
+  "pinParams": {},
+  "families": [
+    "esp32"
+  ],
+  "defaultBoard": "esp32c3_usb",
+  "notWith": [
+    "expnetpro",
+    "expnet"
+  ],
+  "sources": [
+    "src"
+  ]
+}

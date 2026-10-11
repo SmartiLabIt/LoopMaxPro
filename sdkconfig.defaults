@@ -1,0 +1,46 @@
+# LoopMaxPro - ESP-IDF settings common to every board.
+# The settings of one board are in boards/sdkconfig.<environment>.
+
+# Same tick as the Arduino builds: one millisecond.
+CONFIG_FREERTOS_HZ=1000
+
+# The startup runs in the main task before the system has its own.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# The table comes from partitions/, the file is chosen by the board.
+CONFIG_PARTITION_TABLE_CUSTOM=y
+
+# The console belongs to LoopMaxPro: the framework reports problems only.
+CONFIG_BOOTLOADER_LOG_LEVEL_WARN=y
+CONFIG_LOG_DEFAULT_LEVEL_WARN=y
+
+CONFIG_COMPILER_OPTIMIZATION_SIZE=y
+
+# A new firmware is on trial until the update service confirms it: a firmware that does not
+# hold gives way to the one of before at the next start.
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
+# Servers are checked against the certificates of the public authorities.
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+# Chains that end on a root cross-signed by one no more in the bundle, as ipwho.is (GTS Root R4
+# signed by GlobalSign Root CA): the bundle root in the middle of the chain is enough. 700 bytes.
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY=y
+
+# HTTP server: same limits as the Arduino builds. A browser sends long headers.
+# Sockets: the server of the console takes 7 plus 3 of its own, and MQTTS, the client of web
+# services, DNS and NTP need theirs. With the 10 of ESP-IDF the requests of a console that
+# opens reset. 16, as the Arduino core has.
+CONFIG_LWIP_MAX_SOCKETS=16
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=1024
+CONFIG_HTTPD_MAX_URI_LEN=512
+
+# Secure connections: 16 KB to receive, 4 KB to send, and both given back while the
+# connection has nothing to do. A connection that stays open, as the one of the cloud, then
+# costs little, and a request to a server fits beside it. The certificates of the
+# authorities are freed after the handshake.
+CONFIG_MBEDTLS_ASYMMETRIC_CONTENT_LEN=y
+CONFIG_MBEDTLS_SSL_IN_CONTENT_LEN=16384
+CONFIG_MBEDTLS_SSL_OUT_CONTENT_LEN=4096
+CONFIG_MBEDTLS_DYNAMIC_BUFFER=y
+CONFIG_MBEDTLS_DYNAMIC_FREE_CONFIG_DATA=y
+CONFIG_MBEDTLS_DYNAMIC_FREE_CA_CERT=y
