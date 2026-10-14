@@ -25,6 +25,7 @@ ready and does nothing.
 - [What the device sends](#what-the-device-sends)
 - [What the device accepts](#what-the-device-accepts)
 - [Document, commands and console](#document-commands-and-console)
+- [The things of the modules, for a server](#the-things-of-the-modules-for-a-server)
 - [Build options](#build-options)
 
 ## The two parts
@@ -296,6 +297,63 @@ and `error`. Without a bridge the tab says that the firmware has no cloud connec
 device works on its own. With a bridge a cloud icon in the header shows whether the server is
 connected.
 
+## The things of the modules, for a server
+
+A server that carries the envelopes knows nothing of the modules, and it does not need to.
+Every module tells its **things**
+([Modules and SDK](modules-sdk.md#things-what-a-module-tells-home-automation)): what who uses
+the device reads and commands. They travel as data in what the device already sends: no
+envelope is of the things alone, and a bridge has nothing to do for them.
+
+<p align="center">
+<img src="assets/img/things.svg" alt="LoopMaxPro things: a module tells its things once (switches, lights, numbers, yes or no, texts, choices, buttons); the system describes them, follows their values, checks what is set and keeps the measures with their time; Home Assistant, a server of yours and the console use them without knowing the module" width="900">
+</p>
+
+**In the document of a module**, which the server gets at every connection and at every change:
+
+```json
+"things": { "gen": 40213, "rev": 88,
+            "values": { "level": 80, "pump": false, "mode": "eco",
+                        "lamp": { "on": true, "brightness": 80, "r": 255, "g": 0, "b": 0 } },
+            "at": { "level": 1790003600 },
+            "parts": 2, "kept": 3 }
+```
+
+| Member | |
+|--------|---|
+| `gen` | Changes when the **description** changes: a thing or a part added, taken away, renamed, a limit or a choice that changes. The same after a restart |
+| `rev` | Goes up when a **value** changes, and when a number is measured again |
+| `values` | The things of the module itself, by id. Yes or no: `true`, `false`. A number: as it is shown, `null` when it is **not known**. A text or a choice: a string. A light: an object. A button has no value |
+| `at` | When each number that says it was measured, as Unix seconds. Measured again with the same value, the time is another: a value that stands still is not a sensor that is silent |
+| `parts` | How many parts the module has, as the nodes of a hub. Their values are read with `things.values` |
+| `kept` | How many measures, made while the server was away, wait to be asked for with `things.kept` |
+
+**Four commands**, the same on every module:
+
+| Command | Arguments | Answer |
+|---------|-----------|--------|
+| `things` | `from` | What the things are: `id`, `kind` (`toggle`, `light`, `number`, `flag`, `text`, `select`, `button`), `name` (English and Italian, or one text for a name the owner gave) and, when they apply, `type`, `unit`, `decimals`, `min`, `max`, `step`, `options`, `writable`, `technical`. The things of a part once, `partThings`, and the parts a page at a time |
+| `things.values` | `since`, `from` | The values of the parts changed since a `rev`, a page at a time, each with its `at` |
+| `thing.set` | `thing`, and `value`, `number`, `brightness`, `r`, `g`, `b` | Turns, presses or sets one thing. What is set is checked on the device against what the thing says of itself: out of its limits or not among its values, the answer is `invalid` with the `field` |
+| `things.kept` | `after` | The measures kept, the oldest first: `seq`, `thing`, `part`, `value`, `at`. With `after`, the device forgets the ones up to that `seq`: it forgets only what the server says it has |
+
+**What a server can build on it**, with no code for each module:
+
+| | From |
+|---|------|
+| A page, an app or a dashboard for a device it has never seen | The description: kinds, names, units, the limits for a gauge, the values of a choice for a list |
+| Voice assistants and home systems, from cloud to cloud | The same list Home Assistant gets, with what can be set and within which limits |
+| Thresholds and notifications | The values at every change; the limits say where a threshold makes sense |
+| "No data for N minutes" | `at`: when each number was measured last |
+| A history without holes | `things.kept`: what the device measured while the server could not be reached |
+| Commands offered safely | The [manifest](http-api.md) says of each command whether it only reads, whether it reaches outside the device, whether its answer is to keep |
+
+The measures are kept in memory, `LMP_THINGS_KEPT` of them (64), 20 bytes each: the room is
+taken at the first one and given back when the server has them all. When it is full the oldest
+one goes, and the answer of `things.kept` says how many went (`lost`). A restart loses them, and
+a device that does not know the time keeps none: a measure without its time cannot be placed.
+A firmware without a bridge keeps nothing.
+
 ## Build options
 
 From [include/lmp_config.h](../include/lmp_config.h). Each one can be changed with
@@ -312,6 +370,7 @@ From [include/lmp_config.h](../include/lmp_config.h). Each one can be changed wi
 | `LMP_CLOUD_WAITING` | 4 | Commands followed until they end |
 | `LMP_CLOUD_PARTIAL_MS` | 2000 | Wait before a partial report leaves |
 | `LMP_CLOUD_DATA_MS` | 500 | Wait before the documents of the modules leave |
+| `LMP_THINGS_KEPT` | 64 | Measures kept while the server is away. 0: none |
 
 ---
 

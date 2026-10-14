@@ -22,6 +22,7 @@
 #include "sdk/module.h"
 #include "sdk/state.h"
 #include "services/bus/bus_service.h"
+#include "services/clock/clock_service.h"
 #include "services/geo/geo_service.h"
 #include "services/httpclient/httpclient_service.h"
 #include "services/net/net_service.h"
@@ -103,6 +104,8 @@ constexpr uint8_t kScreenLooks = 3;
 
 // lang: the language of the name, two letters; the one of the device when not given.
 const lmp::ArgSpec kUnitArgs[] = {lmp::Arg::boolean("fahrenheit")};
+// The degrees, as a home system chooses them (sdk/home.h).
+constexpr lmp::sdk::ThingOption kUnits[] = {{"C", "Celsius"}, {"F", "Fahrenheit"}};
 const lmp::ArgSpec kPlaceArgs[] = {lmp::Arg::str("name", 0, 48).optional(),
                                    lmp::Arg::str("lang", 2, 2).optional()};
 // What the sky is like, from the WMO code the service gives.
@@ -333,13 +336,14 @@ class Settings final : public lmp::sdk::ModuleConfig<Cfg> {
 };
 
 class MeteoWifi final : public lmp::sdk::Module {
-  LMP_MODULE("meteowifi", "MeteoWifi", "\xF0\x9F\x8C\xA4", "1.0.4",
+  LMP_MODULE("meteowifi", "MeteoWifi", "\xF0\x9F\x8C\xA4", "1.0.5",
              lmp::sdk::ModuleKind::Online, 1000)
 
  public:
   Status onInit(lmp::sdk::ModuleContext& c) override {
     // A module that starts again starts from nothing: the weather is asked again.
     have_ = asked_ = asking_ = forced_ = false;
+    gotAt_ = 0;
     dayCount_ = 0;
     problem_ = searched_ = "";
     search_.clear();
@@ -430,20 +434,45 @@ class MeteoWifi final : public lmp::sdk::Module {
   // What a home system reads of the weather (sdk/home.h): the values of the console.
   void things(lmp::sdk::ThingSink& out) const override {
     const char* deg = settings_->fahrenheit ? "\xC2\xB0" "F" : "\xC2\xB0" "C";
+    // The four numbers arrive together, with the weather: that is when they were measured.
+    out.measured(gotAt_);
     out.number("temperature", {"Temperature", "Temperatura"}, now_.temp, deg,
                "temperature", 1, have_);
+    out.measured(gotAt_);
     out.number("feels", {"Feels like", "Percepita"}, now_.feels, deg, "temperature", 1,
                have_);
+    out.measured(gotAt_);
+    out.range(0, 100);
     out.number("humidity", {"Humidity", "Umidit\xC3\xA0"}, now_.humidity, "%", "humidity", 0,
                have_);
+    out.measured(gotAt_);
     out.number("wind", {"Wind", "Vento"}, now_.wind, "km/h", "wind_speed", 1, have_);
     out.button("refresh", {"Refresh the weather", "Aggiorna il meteo"});
+    // The city and the degrees can be set from outside too, as with the commands. Empty: the
+    // place of the device.
+    out.settable(0, 48);
+    out.text("place", {"City", "Citt\xC3\xA0"}, settings_->place.c_str());
+    out.settable();
+    out.choice("units", {"Degrees", "Gradi"}, settings_->fahrenheit ? "F" : "C", kUnits);
   }
 
-  Status thingSet(const char* id, const lmp::sdk::ThingAsk&) override {
-    if (strcmp(id, "refresh") != 0) return Status::NotFound;
-    forced_ = true;
-    return Status::Ok;
+  Status thingSet(const char* id, const lmp::sdk::ThingAsk& ask) override {
+    if (strcmp(id, "refresh") == 0) {
+      forced_ = true;
+      return Status::Ok;
+    }
+    if (strcmp(id, "place") == 0) {
+      // The search takes a moment and goes on by itself: found, the city is the new value.
+      const Status s = choose(ask.text, nullptr, 0);
+      return s == Status::Pending ? Status::Ok : s;
+    }
+    if (strcmp(id, "units") == 0) {
+      settings_->fahrenheit = ask.text[0] == 'F';
+      settings_.touch();
+      onSettings();
+      return Status::Ok;
+    }
+    return Status::NotFound;
   }
 
   void describe(lmp::JsonWriter& w) const override {
@@ -811,6 +840,9 @@ class MeteoWifi final : public lmp::sdk::Module {
     }
     have_ = true;
     gotMs_ = nowMs_;
+    // When the weather was read, for who reads the module as data: 0 without the time.
+    const lmp::IClockService* clock = ctx().clock;
+    gotAt_ = clock && clock->synced() ? clock->unixTime() : 0;
     nextMs_ = nowMs_ + settings_->everyMin * 60000u;
     problem_ = "";
     markChanged();
@@ -934,6 +966,7 @@ class MeteoWifi final : public lmp::sdk::Module {
   const char* problem_ = "";
   const char* searched_ = "";
   uint32_t nowMs_ = 0, gotMs_ = 0, nextMs_ = 0;   // nextMs_: when to ask again
+  int64_t gotAt_ = 0;                             // when the weather was read, as Unix time
   // The search of the screen: the place where the bus is, or goes next, among kScreenPlaces.
   uint32_t screenAtMs_ = 0;       // when to look again
   uint8_t screenAt_ = 0;

@@ -215,6 +215,14 @@ set.add("set", LMP_HELP("Switches one channel"), kSetArgs,
 | `kCmdConfirm` | the web console asks for confirmation before it sends the command. The device does not check it |
 | `kCmdAsync` | the handler answers `Pending`; the outcome arrives later with a `CommandDone` event |
 | `kCmdAnyArgs` | the command takes any name: the handler reads the request itself, from `ctx.raw` |
+| `kCmdReadOnly` | the command only reads. The manifest says `readOnly` |
+| `kCmdSensitive` | the command acts outside the device, or undoes what does not come back. The manifest says `sensitive` |
+| `kCmdSecret` | the answer of the command carries something to keep. The manifest says `secret` |
+| `kCmdUi` | the command serves the page of the module only. The manifest says `ui` |
+
+The last four change nothing in how the bus runs a command: they tell who offers the commands
+of a device without knowing its modules what each one is. A command without them is taken as
+one that changes something.
 
 ### What the bus does
 
@@ -283,7 +291,7 @@ over HTTP, `targets` and `man <target>` on the serial console.
 |-------|--------------|---------|
 | Targets, services plus modules | `LMP_MAX_TARGETS` | 20 + `LMP_MAX_MODULES` |
 | Commands of all the targets | `LMP_MAX_COMMANDS` | 48, 96 or 160 by tier |
-| Arguments of one command | `LMP_CMD_MAX_ARGS` | 6 |
+| Arguments of one command | `LMP_CMD_MAX_ARGS` | 8 |
 | Room for the text arguments of one call | `LMP_CMD_TEXT` | 256 bytes |
 
 ## Events
@@ -791,7 +799,8 @@ Besides its own commands, every module has some standard ones on its target `mod
 | `config.reset` | | **(c)** modules with settings: back to the ones the module was born with |
 | `things` | `from?` | what the module shows and lets command; in the builds with `mqtt` or `cloud` |
 | `things.values` | `since?`, `from?` | the values that changed since a revision |
-| `thing.set` | `thing`, `value?`, `brightness?`, `r?`, `g?`, `b?` | turns, presses or sets one thing; `value` is `ON`, `OFF` or `PRESS` |
+| `thing.set` | `thing`, `value?`, `brightness?`, `r?`, `g?`, `b?`, `number?` | turns, presses or sets one thing; `value` is `ON`, `OFF`, `PRESS`, or the text or the choice to set; `number` is for a number that can be set |
+| `things.kept` | `after?` | the measures made while the server of the device was away, 12 at a time, the oldest first: `seq`, `thing`, `part`, `value`, `at`. `after` is the last one the asker has: it is forgotten with those before it. Up to `LMP_THINGS_KEPT` measures are kept, 64, in memory |
 
 See [Modules and SDK](modules-sdk.md) and [Writing a module](writing-a-module.md).
 

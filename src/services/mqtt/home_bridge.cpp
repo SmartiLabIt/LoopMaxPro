@@ -54,6 +54,15 @@ class HomePass final : public sdk::ThingSink {
 
   void technical() override { technical_ = true; }
 
+  // What can be set is for Home Assistant a number, a text or a select of its own. The limits
+  // of a number that is only read say nothing to it.
+  void settable(double min, double max, double step) override {
+    settable_ = true;
+    min_ = min;
+    max_ = max;
+    step_ = step;
+  }
+
   void toggle(const char* id, sdk::ThingName name, bool on, const char* kind) override {
     thing("switch", id, name, nullptr, kind, 0, false);
     value(id, on ? "\"ON\"" : "\"OFF\"");
@@ -66,28 +75,31 @@ class HomePass final : public sdk::ThingSink {
 
   void number(const char* id, sdk::ThingName name, double number, const char* unit,
               const char* kind, uint8_t decimals, bool known) override {
-    thing("sensor", id, name, unit, kind, decimals, true);
+    const bool sets = settable_;
+    thing(sets ? "number" : "sensor", id, name, unit, kind, decimals, !sets);
     char text[24] = "null";
     if (known) snprintf(text, sizeof(text), "%.*f", static_cast<int>(decimals), number);
     value(id, text);
   }
 
   void text(const char* id, sdk::ThingName name, const char* word) override {
-    thing("sensor", id, name, nullptr, nullptr, 0, false);
-    char quoted[48];
-    size_t n = 0;
-    quoted[n++] = '"';
-    for (const char* c = word ? word : ""; *c && n + 3 < sizeof(quoted); ++c) {
-      if (*c == '"' || *c == '\\' || static_cast<uint8_t>(*c) < 0x20) continue;
-      quoted[n++] = *c;
-    }
-    quoted[n++] = '"';
-    quoted[n] = '\0';
-    value(id, quoted);
+    thing(settable_ ? "text" : "sensor", id, name, nullptr, nullptr, 0, false);
+    quoted(id, word);
   }
 
   void button(const char* id, sdk::ThingName name) override {
     thing("button", id, name, nullptr, nullptr, 0, false);
+  }
+
+  // The values are told by their ids: they are what comes back when one is chosen.
+  void choice(const char* id, sdk::ThingName name, const char* now,
+              const sdk::ThingOption* options, uint8_t count) override {
+    const bool sets = settable_;
+    options_ = options;
+    optionCount_ = count;
+    thing(sets ? "select" : "sensor", id, name, nullptr, sets ? nullptr : "enum", 0, false);
+    optionCount_ = 0;
+    quoted(id, now);
   }
 
   void light(const char* id, sdk::ThingName name, bool on, uint8_t brightness, uint8_t r,
@@ -168,6 +180,20 @@ class HomePass final : public sdk::ThingSink {
     if (bridge_.state_) bridge_.state_[0] = '\0';
   }
 
+  // A word among the values, as JSON text: without what would break it.
+  void quoted(const char* id, const char* word) {
+    char text[sdk::kThingTextMax + 4];
+    size_t n = 0;
+    text[n++] = '"';
+    for (const char* c = word ? word : ""; *c && n + 3 < sizeof(text); ++c) {
+      if (*c == '"' || *c == '\\' || static_cast<uint8_t>(*c) < 0x20) continue;
+      text[n++] = *c;
+    }
+    text[n++] = '"';
+    text[n] = '\0';
+    value(id, text);
+  }
+
   void value(const char* id, const char* text) {
     if (!bridge_.state_) return;
     const int n = snprintf(bridge_.state_ + stateLength_, kStateMax - stateLength_, "%s\"%s\":%s",
@@ -208,7 +234,16 @@ class HomePass final : public sdk::ThingSink {
     // Asked for this thing only: taken here, whatever happens to its description.
     const bool apart = technical_;
     technical_ = false;
+    const bool sets = settable_;
+    settable_ = false;
     sig_ = mix(mix(mix(mix(mix(mix(sig_, component), id), name), unit), kind), apart ? "t" : "");
+    for (uint8_t i = 0; i < optionCount_; ++i) sig_ = mix(sig_, options_[i].id);
+    if (sets) {
+      // Other limits are another description, as another name is.
+      char limits[72];
+      snprintf(limits, sizeof(limits), "%.6g %.6g %.6g", min_, max_, step_);
+      sig_ = mix(sig_, limits);
+    }
     if (!describing_ || !place()) return;
 
     const char* base = bridge_.mqtt_->base();
@@ -244,11 +279,25 @@ class HomePass final : public sdk::ThingSink {
       snprintf(text, sizeof(text), "{{ value_json.%s }}", id);
       w.str("val_tpl", text);
     }
-    if (light || pressed || strcmp(component, "switch") == 0) {
+    if (light || pressed || sets || strcmp(component, "switch") == 0) {
       snprintf(text, sizeof(text), "%s/home/%s/set/%s", base, manifest_.name, full(id));
       w.str("cmd_t", text);
     }
     if (pressed) w.str("pl_prs", "PRESS");
+    if (sets && strcmp(component, "number") == 0) {
+      w.f64("min", min_, 6);
+      w.f64("max", max_, 6);
+      if (step_ > 0) w.f64("step", step_, 6);
+    } else if (sets && strcmp(component, "text") == 0) {
+      if (min_ > 0) w.u32("min", static_cast<uint32_t>(min_));
+      w.u32("max", max_ > 0 && max_ < sdk::kThingTextMax ? static_cast<uint32_t>(max_)
+                                                         : static_cast<uint32_t>(sdk::kThingTextMax));
+    }
+    if (optionCount_) {
+      w.beginArray("ops");
+      for (uint8_t i = 0; i < optionCount_; ++i) w.str(StringView(options_[i].id));
+      w.endArray();
+    }
     if (!light) {
       if (unit && *unit) w.str("unit_of_meas", unit);
       if (kind && *kind) w.str("dev_cla", kind);
@@ -307,6 +356,10 @@ class HomePass final : public sdk::ThingSink {
 
   HomeBridge& bridge_;
   bool technical_ = false;
+  bool settable_ = false;
+  double min_ = 0, max_ = 0, step_ = 0;
+  const sdk::ThingOption* options_ = nullptr;
+  uint8_t optionCount_ = 0;
   uint8_t module_;
   const sdk::ModuleManifest& manifest_;
   bool describing_;
@@ -466,12 +519,8 @@ void HomeBridge::onMessage(StringView topic, StringView payload) {
   if (!target) return;
 
   sdk::ThingAsk ask;
-  if (payload == StringView("ON") || payload == StringView("OFF")) {
-    ask.hasOn = true;
-    ask.on = payload == StringView("ON");
-  } else if (payload == StringView("PRESS")) {
-    ask.press = true;
-  } else if (payload.size && payload[0] == '{') {
+  char word[sdk::kThingTextMax + 1] = "";
+  if (payload.size && payload[0] == '{') {
     // A light, as Home Assistant writes it: state, brightness up to 255, colour.
     const JsonValue json = JsonValue::parse(payload);
     if (!json.valid()) return;
@@ -492,7 +541,23 @@ void HomeBridge::onMessage(StringView topic, StringView payload) {
       ask.b = static_cast<uint8_t>(json["color"]["b"].asInt(0));
     }
   } else {
-    return;
+    if (payload.size > sdk::kThingTextMax) return;
+    payload.copyTo(word, sizeof(word));
+    if (strcmp(word, "ON") == 0 || strcmp(word, "OFF") == 0) {
+      ask.hasOn = true;
+      ask.on = word[1] == 'N';
+    } else if (strcmp(word, "PRESS") == 0) {
+      ask.press = true;
+    }
+    // What can be set arrives as it is written, a number too: the thing itself says which
+    // of the two it takes, and whether this one is good for it.
+    ask.hasText = true;
+    ask.text = word;
+    const JsonValue number = JsonValue::parse(payload);
+    if (number.isNumber()) {
+      ask.hasNumber = true;
+      ask.number = number.asDouble();
+    }
   }
   ++asked_;
   const Status s = target->thingSetAll(thing, ask);

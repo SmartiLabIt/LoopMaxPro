@@ -17,11 +17,11 @@ import { ScheduleEditor, channelPlan, daysText, localParts, scheduleActive,
 import { ModuleUiTab, loadModuleUi, stoppedText, uiTabs } from './module-ui.js';
 
 // Commands the views below already give a place to.
-// The last three are of every module: the things it shows to who reads them as data
+// The last four are of every module: the things it shows to who reads them as data
 // (the server, a home system). Not actions of the device for who looks at this page.
 const DRAWN = ['set', 'toggle', 'all', 'flip', 'name', 'invert', 'restore', 'sched.add',
                'sched.update', 'sched.remove', 'sched.clear', 'config.set', 'config.reset',
-               'things', 'things.values', 'thing.set'];
+               'things', 'things.values', 'thing.set', 'things.kept'];
 // Members of the document the views below already show.
 const SHOWN = ['config', 'pins', 'output', 'restore', 'schedules', 'schedulesMax',
                'schedulesRunning', 'now', 'days'];

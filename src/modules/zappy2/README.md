@@ -47,7 +47,8 @@ module.
 - **After a power cut** the channels go back to what they were, if you want them to.
 - **Relay boards of both kinds**: a channel can be inverted for the boards that switch with a
   low pin.
-- **Home Assistant**: the two channels are outlets, on the ESP32 family.
+- **Home Assistant**: the two channels are outlets, with a button that inverts them, on the
+  ESP32 family.
 
 <h2 id="hardware"><img src="../../../docs/assets/h/hardware.svg" alt="Hardware" height="24"></h2>
 
@@ -208,6 +209,16 @@ With MQTT on and a broker set in the console (MQTT page, "Presents itself to Hom
 the two channels appear in Home Assistant as switches, `ch0` and `ch1`, with the names you gave
 them. They are told as outlets, so that Home Assistant, and the voice assistants behind it,
 take them for sockets and not for plain switches. A channel a schedule holds refuses a command
-from there too. MQTT is part of the firmware of the ESP32 family, not of the ESP8266 boards.
+from there too. A button, `flip`, inverts the two channels in one gesture, as the command `flip`
+does: it leaves a channel a schedule holds as it is. MQTT is part of the firmware of the ESP32
+family, not of the ESP8266 boards.
+
+| Thing | In Home Assistant | |
+|-------|-------------------|---|
+| `ch0`, `ch1` | switch, class `outlet` | on and off, with the name of the channel |
+| `flip` Invert | button | each channel becomes the opposite of what it is |
+
+From there the two sockets go into dashboards, automations and scenes, and reach the voice
+assistants Home Assistant is linked to.
 
 More in [Discovery, MQTT and Home Assistant](../../../docs/network-and-home-assistant.md).

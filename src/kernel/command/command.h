@@ -38,7 +38,14 @@ enum CmdFlags : uint8_t {
   kCmdNone = 0,
   kCmdConfirm = 1,  // the console asks for confirmation before sending it
   kCmdAsync = 2,    // returns Pending: the outcome arrives with a CommandDone event
-  kCmdAnyArgs = 4   // takes any name: the handler reads the request itself, from ctx.raw
+  kCmdAnyArgs = 4,  // takes any name: the handler reads the request itself, from ctx.raw
+  // What a command is, for who offers it without knowing the module. A command that says
+  // none of these is taken as one that changes something.
+  kCmdReadOnly = 8,    // changes nothing: it only reads
+  kCmdSensitive = 16,  // acts outside the device, or undoes what does not come back: turns a
+                       // PC off, calls an address from inside the network, clears a count
+  kCmdSecret = 32,     // its answer carries something to keep: never shown, never written down
+  kCmdUi = 64          // serves the page of the module: of no use to who does not draw it
 };
 
 struct ArgSpec {
@@ -209,6 +216,7 @@ class CommandBus {
   // State document of a target. The caller opens and closes the object.
   Status describe(StringView target, JsonWriter& w) const;
   // {"target":"sys.net","commands":[{"name":..,"help":..,"args":[..]}]}
+  // A command also says, when it is so: confirm, async, anyArgs, readOnly, sensitive, secret, ui.
   // withHelp false leaves the help texts out: a third of the size, for the small boards.
   Status manifest(StringView target, JsonWriter& w, bool withHelp = true) const;
   // ["sys.system","sys.log",...]

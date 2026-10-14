@@ -46,7 +46,8 @@ wants to write a module with a light.
 - **On and off** that keep the colour or the effect.
 - **Schedules**: every week on the days you choose, or once; four of them.
 - **After a power cut** the strip comes back as it was, if you want it to.
-- **Home Assistant**: the strip is a light with brightness and colour, on the ESP32 family.
+- **Home Assistant**: the strip is a light with brightness and colour, with its effect to
+  choose and the speed of the effect to set, on the ESP32 family.
 
 <h2 id="hardware"><img src="../../../docs/assets/h/hardware.svg" alt="Hardware" height="24"></h2>
 
@@ -245,5 +246,17 @@ the strip appears in Home Assistant as a light, `light0`, with the name of its c
 off, brightness and colour. A colour asked from there ends the effect, as the command does; in
 the span of a schedule turning it on or off is refused. MQTT is part of the firmware of the
 ESP32 family, not of the ESP8266 boards.
+
+The effect and its speed are there too, to choose and to set:
+
+| Thing | In Home Assistant | |
+|-------|-------------------|---|
+| `light0` | light | on and off, brightness, colour |
+| `effect0` Effect | select | `color` for the fixed colour, `christmas`, `rainbow`, `breath`, `blink`, `fade`. Choosing an effect turns the strip on |
+| `speed0` Effect speed | number | from 1 to 100 |
+
+So an automation can do what until now was done only in the console: the rainbow at sunset, a
+slow breath at night, the fixed colour again in the morning. A value that is not one of the
+six, or a speed out of its limits, is refused by the device.
 
 More in [Discovery, MQTT and Home Assistant](../../../docs/network-and-home-assistant.md).

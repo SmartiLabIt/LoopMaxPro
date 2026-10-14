@@ -80,6 +80,7 @@ class ModulesService : public Service, public IModulesService, private sdk::Modu
     bool fileDue = false;     // a change is waiting to be written
 #if LMP_FEATURE_THINGS
     sdk::ThingsBook things;   // what its things were at the last look
+    uint16_t kept = 0;        // measures of its numbers kept for the server
 #endif
   };
 
@@ -115,6 +116,28 @@ class ModulesService : public Service, public IModulesService, private sdk::Modu
   static void describeThings(const Slot& slot, JsonWriter& w);
   static bool works(const Slot& slot);
   int indexOf(StringView name) const;
+#if LMP_FEATURE_THINGS
+  // A measure made while the server of the device was away (sdk/things.h): kept with its time
+  // until the server asks for it. When the room is full the oldest one goes.
+  struct Kept {
+    uint32_t seq;     // goes up at every measure kept: how the server says which ones it has
+    uint32_t at;      // Unix seconds
+    uint32_t key;     // the number, as sdk::thingKey names it
+    float value;
+    uint8_t module;   // the place of its module
+  };
+  // True while the device has a server to tell, and the server is not there.
+  bool serverAway() const;
+  void keep(uint8_t module, uint32_t key, double value, uint32_t at);
+  void dropKept(uint16_t place);
+  // What the server asks: forgets the measures it says it has, gives a page of the others.
+  Status tellKept(Slot& slot, const Args& args, CmdContext& ctx);
+
+  Kept* kept_ = nullptr;      // taken at the first measure to keep, given back when none is left
+  uint16_t keptCount_ = 0;
+  uint32_t keptSeq_ = 0;
+  uint32_t keptLost_ = 0;     // measures that went because the room was full
+#endif
 
   Kernel* kernel_ = nullptr;
   LogSource src_ = kLogSys;

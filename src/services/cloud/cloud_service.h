@@ -54,6 +54,8 @@ class ICloudService {
   virtual Status attach(ICloudBridge& bridge) = 0;
   virtual void detach(ICloudBridge& bridge) = 0;
   virtual bool connected() const = 0;
+  // True when the device has a server to tell, whether it is there now or not.
+  virtual bool attached() const = 0;
 };
 
 class CloudService : public Service, public ICloudService, private ILogSink {
@@ -73,6 +75,7 @@ class CloudService : public Service, public ICloudService, private ILogSink {
   Status attach(ICloudBridge& bridge) override;
   void detach(ICloudBridge& bridge) override;
   bool connected() const override { return up_; }
+  bool attached() const override { return bridge_ != nullptr; }
 
  private:
   // Parts of the report, as bits: what changed and waits to be told.

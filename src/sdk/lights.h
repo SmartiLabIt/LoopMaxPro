@@ -69,7 +69,8 @@ class LightsBase : public Component {
   void tick(uint32_t nowMs) override;
   void stop() override;
   // For a home system each light is a light, "light0", "light1": on and off, brightness,
-  // colour. A colour asked from there ends the effect, as the command does.
+  // colour. A colour asked from there ends the effect, as the command does. Its effect is a
+  // choice, "effect0", and the speed of the effect a number to set, "speed0".
   void things(ThingSink& sink) const override;
   Status thingSet(const char* id, const ThingAsk& ask) override;
 
@@ -101,6 +102,7 @@ class LightsBase : public Component {
   uint8_t pixelOf(const Light& l, uint8_t value) const;
   uint32_t random();
   bool effectFits(const Light& l, int effect) const;
+  int lightOfId(const char* id, const char* word) const;
   Status turnOn(uint8_t light);
   bool lightOf(const Args& a, CmdContext& ctx, uint8_t& out) const;
 

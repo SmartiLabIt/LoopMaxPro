@@ -226,3 +226,7 @@ JSON in `/espradio/favs.jsonl`, with short names: `i` id, `n` name, `u` address,
   degree, about 10 km.
 - Radio Browser is told when one of its stations is played: its lists of the most listened
   come from these counts.
+- With MQTT on and a broker set, the device shows in Home Assistant one sensor, `favs`: how
+  many favourite stations it keeps, out of how many it can. The sound is of the browser, so
+  there is nothing on the board to turn on or off. The same number is what a program reads
+  from the things of the module, through the HTTP API.

@@ -320,8 +320,151 @@ void test_a_part_of_a_module_is_a_device_of_its_own() {
   TEST_ASSERT_EQUAL_STRING("{\"nodes\":21}", lastOn(sys, base("home/hub/state"))->payload.c_str());
 }
 
+// ---------------------------------------------------------------- what can be set
+
+namespace {
+
+// Many values, with long ids: the description of a choice must have room for them.
+constexpr sdk::ThingOption kModes[] = {
+    {"off", {"Off", "Fermo"}},            {"eco", {"Eco", "Risparmio"}},
+    {"comfort", {"Comfort", "Comfort"}},  {"night", {"Night", "Notturno"}},
+    {"holiday", {"Holiday", "Vacanza"}},  {"antifreeze", {"Antifreeze", "Antigelo"}},
+    {"boost", {"Boost", "Rapido"}},       {"schedule", {"Schedule", "Programma"}},
+    {"manual", {"Manual", "Manuale"}},    {"ventilation", {"Ventilation", "Ventilazione"}},
+};
+constexpr sdk::ThingOption kStages[] = {
+    {"idle", {"Idle", "Fermo"}},
+    {"heating", {"Heating", "Scalda"}},
+};
+
+// A heater: a temperature to set, a name, a mode to choose, and what it is doing.
+class Heater final : public sdk::Module {
+  LMP_MODULE("heater", "Heater of the test", "", "1.0.0", sdk::ModuleKind::Hardware, 100)
+
+ public:
+  Status onInit(sdk::ModuleContext&) override { return Status::Ok; }
+
+  void things(sdk::ThingSink& out) const override {
+    out.range(0, 100);
+    out.number("power", {"Power", "Potenza"}, 40, "%");
+    out.settable(5, 30, 0.5);
+    out.number("target", {"Target", "Voluta"}, target, "\xC2\xB0" "C", "temperature", 1);
+    out.settable(0, 16);
+    out.text("label", {"Label", "Etichetta"}, label.c_str());
+    out.settable();
+    out.choice("mode", {"Mode", "Modo"}, mode.c_str(), kModes);
+    out.choice("stage", {"Stage", "Fase"}, "idle", kStages);
+  }
+
+  Status thingSet(const char* id, const sdk::ThingAsk& ask) override {
+    if (strcmp(id, "target") == 0) {
+      target = ask.number;
+    } else if (strcmp(id, "label") == 0) {
+      label = ask.text;
+    } else if (strcmp(id, "mode") == 0) {
+      mode = ask.text;
+    } else {
+      return Status::NotFound;
+    }
+    markChanged();
+    return Status::Ok;
+  }
+
+  double target = 21;
+  std::string label = "Hall";
+  std::string mode = "eco";
+};
+
+}  // namespace
+
+void test_what_can_be_set_is_set_from_home_assistant() {
+  static Heater heater;
+  OnlineSystem sys(true, withBroker, 1500, {&heater});
+  sys.advance(4000);
+
+  // A number to set is a number of Home Assistant, with its limits and its step.
+  {
+    const MqttSent* told = lastOn(sys, what(sys, "number", "heater_target"));
+    const JsonValue d = json(told);
+    TEST_ASSERT_TRUE(d.valid());
+    TEST_ASSERT_TRUE(d["cmd_t"].stringEquals(base("home/heater/set/target").c_str()));
+    TEST_ASSERT_TRUE(d["stat_t"].stringEquals(base("home/heater/state").c_str()));
+    TEST_ASSERT_TRUE(d["val_tpl"].stringEquals("{{ value_json.target }}"));
+    TEST_ASSERT_EQUAL_INT64(5, d["min"].asInt(-1));
+    TEST_ASSERT_EQUAL_INT64(30, d["max"].asInt(-1));
+    TEST_ASSERT_NOT_NULL(strstr(told->payload.c_str(), "\"step\":0.5"));
+    TEST_ASSERT_TRUE(d["dev_cla"].stringEquals("temperature"));
+    // It is not a measure.
+    TEST_ASSERT_FALSE(d["stat_cla"].valid());
+  }
+  // One that is only read stays a sensor: its limits are not for Home Assistant.
+  {
+    const JsonValue d = json(lastOn(sys, what(sys, "sensor", "heater_power")));
+    TEST_ASSERT_TRUE(d["stat_cla"].stringEquals("measurement"));
+    TEST_ASSERT_FALSE(d["min"].valid());
+    TEST_ASSERT_FALSE(d["cmd_t"].valid());
+  }
+  // A text to set, as long as the module takes it.
+  {
+    const JsonValue d = json(lastOn(sys, what(sys, "text", "heater_label")));
+    TEST_ASSERT_TRUE(d["cmd_t"].stringEquals(base("home/heater/set/label").c_str()));
+    TEST_ASSERT_EQUAL_INT64(16, d["max"].asInt(-1));
+  }
+  // A choice to make, with all its values; the one that is only read is a sensor with them.
+  {
+    const JsonValue d = json(lastOn(sys, what(sys, "select", "heater_mode")));
+    TEST_ASSERT_TRUE(d.valid());
+    TEST_ASSERT_TRUE(d["cmd_t"].stringEquals(base("home/heater/set/mode").c_str()));
+    TEST_ASSERT_EQUAL_UINT(10, d["ops"].size());
+    TEST_ASSERT_TRUE(d["ops"].at(0).stringEquals("off"));
+    TEST_ASSERT_TRUE(d["ops"].at(9).stringEquals("ventilation"));
+    const JsonValue s = json(lastOn(sys, what(sys, "sensor", "heater_stage")));
+    TEST_ASSERT_TRUE(s["dev_cla"].stringEquals("enum"));
+    TEST_ASSERT_EQUAL_UINT(2, s["ops"].size());
+    TEST_ASSERT_FALSE(s["cmd_t"].valid());
+  }
+  TEST_ASSERT_EQUAL_STRING(
+      "{\"power\":40,\"target\":21.0,\"label\":\"Hall\",\"mode\":\"eco\",\"stage\":\"idle\"}",
+      lastOn(sys, base("home/heater/state"))->payload.c_str());
+
+  // Home Assistant sets them: a number as it writes it, a text, one of the values.
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/target").c_str(), "23.5"));
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/label").c_str(), "Kitchen"));
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/mode").c_str(), "comfort"));
+  sys.advance(800);
+  TEST_ASSERT_EQUAL_DOUBLE(23.5, heater.target);
+  TEST_ASSERT_EQUAL_STRING("Kitchen", heater.label.c_str());
+  TEST_ASSERT_EQUAL_STRING("comfort", heater.mode.c_str());
+  TEST_ASSERT_EQUAL_STRING(
+      "{\"power\":40,\"target\":23.5,\"label\":\"Kitchen\",\"mode\":\"comfort\",\"stage\":\"idle\"}",
+      lastOn(sys, base("home/heater/state"))->payload.c_str());
+  // A text that reads as a number is a text all the same; ON is a word like another.
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/label").c_str(), "42"));
+  sys.advance(300);
+  TEST_ASSERT_EQUAL_STRING("42", heater.label.c_str());
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/label").c_str(), "ON"));
+  sys.advance(300);
+  TEST_ASSERT_EQUAL_STRING("ON", heater.label.c_str());
+
+  // What the thing does not take never reaches the module.
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/target").c_str(), "99"));
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/target").c_str(), "warm"));
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/mode").c_str(), "turbo"));
+  sys.advance(800);
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/stage").c_str(), "heating"));
+  TEST_ASSERT_TRUE(sys.pc().mqtt.deliver(base("home/heater/set/power").c_str(), "80"));
+  sys.advance(800);
+  TEST_ASSERT_EQUAL_DOUBLE(23.5, heater.target);
+  TEST_ASSERT_EQUAL_STRING("comfort", heater.mode.c_str());
+  TEST_ASSERT_TRUE(sys.logHas("home: target of heater not done"));
+  TEST_ASSERT_TRUE(sys.logHas("home: mode of heater not done"));
+  TEST_ASSERT_TRUE(sys.logHas("home: stage of heater not done"));
+  TEST_ASSERT_TRUE(sys.logHas("home: power of heater not done"));
+}
+
 int main(int, char**) {
   UNITY_BEGIN();
+  RUN_TEST(test_what_can_be_set_is_set_from_home_assistant);
   RUN_TEST(test_a_part_of_a_module_is_a_device_of_its_own);
   RUN_TEST(test_home_assistant_is_told_the_things_of_a_module);
   RUN_TEST(test_a_light_is_a_light_for_home_assistant);

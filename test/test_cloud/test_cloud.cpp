@@ -569,6 +569,216 @@ void test_the_things_of_the_modules_reach_the_server() {
   TEST_ASSERT_TRUE(none.v["body"]["status"].stringEquals("not_found"));
 }
 
+// ---------------------------------------------------------------- measures made with the server away
+
+namespace {
+
+// A tank that measures its level, and a pipe that is a part of it. Each measure has its time.
+class Tank final : public sdk::Module {
+  LMP_MODULE("tank", "Tank of the test", "", "1.0.0", sdk::ModuleKind::Hardware, 0)
+
+ public:
+  Status onInit(sdk::ModuleContext&) override { return Status::Ok; }
+
+  void things(sdk::ThingSink& out) const override {
+    out.measured(levelAt);
+    out.number("level", "Level", level, "%", nullptr, 1);
+    out.number("pumps", "Pumps", pumps);   // says no time: a count, not a measure
+    out.part("p1", "Pipe 1");
+    out.measured(flowAt);
+    out.number("flow", "Flow", flow, "l/min", nullptr, 1);
+    out.part(nullptr, nullptr);
+  }
+
+  void measure(double value, int64_t at) {
+    level = value;
+    levelAt = at;
+    markChanged();
+  }
+  void pipe(double value, int64_t at) {
+    flow = value;
+    flowAt = at;
+    markChanged();
+  }
+  void tell() { markChanged(); }
+
+  double level = 50, flow = 0;
+  int64_t levelAt = 0, flowAt = 0;
+  int pumps = 2;
+};
+
+constexpr int64_t kThen = 1790000000;
+
+// What things.kept answers to the server of the test.
+std::string kept(OnlineSystem& sys, FakeBridge& bridge, const char* args, const char* ref) {
+  return ask(sys, bridge,
+             std::string("{\"type\":\"cmd\",\"target\":\"mod.tank\",\"name\":\"things.kept\",\"ref\":\"") +
+                 ref + "\",\"body\":" + args + "}",
+             ref);
+}
+
+}  // namespace
+
+// While the server is away the device goes on measuring. What it measures is kept, each
+// measure with its time, and the server takes it when it is back: its history has no hole.
+void test_measures_made_with_the_server_away_are_kept_for_it() {
+  Tank tank;
+  tank.levelAt = kThen;
+  OnlineSystem sys(true, nullptr, 1500, {&tank});
+  FakeBridge bridge;
+  sys.app.cloud().attach(bridge);
+  bridge.up = true;
+  sys.advance(1500);
+
+  // With the server there nothing is kept: it is told as it happens.
+  tank.measure(48, kThen + 60);
+  sys.advance(900);
+  {
+    Env last(bridge.ofType("doc").back());
+    TEST_ASSERT_EQUAL_INT64(kThen + 60, last.v["body"]["things"]["at"]["level"].asInt());
+    TEST_ASSERT_FALSE(last.v["body"]["things"]["kept"].valid());
+  }
+
+  // The server goes away. Three measures: one of them the same value again, one of the pipe.
+  bridge.up = false;
+  sys.advance(500);
+  TEST_ASSERT_EQUAL_INT(1, sys.count(EventId::CloudLost));
+  tank.measure(47.5, kThen + 120);
+  sys.advance(500);
+  tank.measure(47.5, kThen + 180);
+  sys.advance(500);
+  tank.pipe(3.2, kThen + 200);
+  sys.advance(500);
+  // What says no time is no measure; told again with nothing measured, nothing more is kept.
+  tank.pumps = 3;
+  tank.tell();
+  sys.advance(500);
+  {
+    Doc doc(sys.kernel(), "mod.tank");
+    TEST_ASSERT_EQUAL_INT64(3, doc.v["things"]["kept"].asInt());
+  }
+
+  // The server is back: the document of the module tells it that there is something to take.
+  bridge.sent.clear();
+  bridge.up = true;
+  sys.advance(1500);
+  {
+    Env first(bridge.ofType("doc").front());
+    TEST_ASSERT_TRUE(first.v["target"].stringEquals("mod.tank"));
+    TEST_ASSERT_EQUAL_INT64(3, first.v["body"]["things"]["kept"].asInt());
+    // And what the things are now, as at every connection.
+    TEST_ASSERT_EQUAL_INT64(kThen + 180, first.v["body"]["things"]["at"]["level"].asInt());
+  }
+  // It asks: the measures, the oldest first, each with its thing, its part and its time.
+  {
+    Env all("{\"body\":" + kept(sys, bridge, "{}", "k1") + "}");
+    TEST_ASSERT_TRUE(all.v["body"]["ok"].asBool());
+    const JsonValue items = all.v["body"]["result"]["items"];
+    TEST_ASSERT_EQUAL_UINT(3, items.size());
+    TEST_ASSERT_EQUAL_INT64(1, items.at(0)["seq"].asInt());
+    TEST_ASSERT_TRUE(items.at(0)["thing"].stringEquals("level"));
+    TEST_ASSERT_FALSE(items.at(0)["part"].valid());
+    TEST_ASSERT_EQUAL_DOUBLE(47.5, items.at(0)["value"].asDouble());
+    TEST_ASSERT_EQUAL_INT64(kThen + 120, items.at(0)["at"].asInt());
+    // The same value measured again is a measure.
+    TEST_ASSERT_EQUAL_INT64(2, items.at(1)["seq"].asInt());
+    TEST_ASSERT_EQUAL_DOUBLE(47.5, items.at(1)["value"].asDouble());
+    TEST_ASSERT_EQUAL_INT64(kThen + 180, items.at(1)["at"].asInt());
+    TEST_ASSERT_EQUAL_INT64(3, items.at(2)["seq"].asInt());
+    TEST_ASSERT_TRUE(items.at(2)["thing"].stringEquals("flow"));
+    TEST_ASSERT_TRUE(items.at(2)["part"].stringEquals("p1"));
+    TEST_ASSERT_EQUAL_DOUBLE(3.2, items.at(2)["value"].asDouble());
+    // Asked and not yet said to be taken: they are all still there.
+    TEST_ASSERT_EQUAL_INT64(3, all.v["body"]["result"]["kept"].asInt());
+    TEST_ASSERT_FALSE(all.v["body"]["result"]["lost"].valid());
+  }
+  // It says which ones it has: those go, the others are given.
+  {
+    Env rest("{\"body\":" + kept(sys, bridge, "{\"after\":2}", "k2") + "}");
+    const JsonValue items = rest.v["body"]["result"]["items"];
+    TEST_ASSERT_EQUAL_UINT(1, items.size());
+    TEST_ASSERT_EQUAL_INT64(3, items.at(0)["seq"].asInt());
+    TEST_ASSERT_EQUAL_INT64(1, rest.v["body"]["result"]["kept"].asInt());
+  }
+  {
+    Env none("{\"body\":" + kept(sys, bridge, "{\"after\":3}", "k3") + "}");
+    TEST_ASSERT_EQUAL_UINT(0, none.v["body"]["result"]["items"].size());
+    TEST_ASSERT_EQUAL_INT64(0, none.v["body"]["result"]["kept"].asInt());
+    Doc doc(sys.kernel(), "mod.tank");
+    TEST_ASSERT_FALSE(doc.v["things"]["kept"].valid());
+  }
+  // With the server there again nothing is kept.
+  tank.measure(46, kThen + 300);
+  sys.advance(900);
+  TEST_ASSERT_FALSE(Doc(sys.kernel(), "mod.tank").v["things"]["kept"].valid());
+}
+
+// The room is not without end: when it is full the oldest measures go, and the server is told
+// how many it will not find.
+void test_when_the_room_is_full_the_oldest_measures_go() {
+  Tank tank;
+  tank.levelAt = kThen;
+  OnlineSystem sys(true, nullptr, 1500, {&tank});
+  FakeBridge bridge;
+  sys.app.cloud().attach(bridge);
+  // A server that was never there since the start. What the things were at the start is where
+  // the measures begin: it is not a measure made now, and it is not kept.
+  tank.tell();
+  sys.advance(500);
+  TEST_ASSERT_FALSE(Doc(sys.kernel(), "mod.tank").v["things"]["kept"].valid());
+
+  for (int i = 1; i <= LMP_THINGS_KEPT + 5; ++i) {
+    tank.measure(50 - i * 0.1, kThen + i * 60);
+    sys.advance(300);
+  }
+  TEST_ASSERT_EQUAL_INT64(LMP_THINGS_KEPT, Doc(sys.kernel(), "mod.tank").v["things"]["kept"].asInt());
+  TEST_ASSERT_TRUE(sys.logHas("measures kept for the server: no more room"));
+
+  bridge.up = true;
+  sys.advance(1500);
+  Env page("{\"body\":" + kept(sys, bridge, "{}", "f1") + "}");
+  const JsonValue result = page.v["body"]["result"];
+  // A page at a time, from the oldest that is still there: the first five went.
+  TEST_ASSERT_EQUAL_UINT(12, result["items"].size());
+  TEST_ASSERT_EQUAL_INT64(6, result["items"].at(0)["seq"].asInt());
+  TEST_ASSERT_EQUAL_INT64(kThen + 6 * 60, result["items"].at(0)["at"].asInt());
+  TEST_ASSERT_EQUAL_INT64(LMP_THINGS_KEPT, result["kept"].asInt());
+  TEST_ASSERT_EQUAL_INT64(5, result["lost"].asInt());
+  // Page after page, to the last one.
+  int taken = 12;
+  int64_t last = result["items"].at(11)["seq"].asInt();
+  for (int round = 0; round < 20; ++round) {
+    const std::string args = "{\"after\":" + std::to_string(last) + "}";
+    const std::string ref = "f" + std::to_string(round + 2);
+    Env next("{\"body\":" + kept(sys, bridge, args.c_str(), ref.c_str()) + "}");
+    const JsonValue items = next.v["body"]["result"]["items"];
+    if (items.size() == 0) break;
+    taken += static_cast<int>(items.size());
+    last = items.at(items.size() - 1)["seq"].asInt();
+  }
+  TEST_ASSERT_EQUAL_INT(LMP_THINGS_KEPT, taken);
+  TEST_ASSERT_EQUAL_INT64(LMP_THINGS_KEPT + 5, last);
+  TEST_ASSERT_FALSE(Doc(sys.kernel(), "mod.tank").v["things"]["kept"].valid());
+}
+
+// A device that has no server keeps nothing: there is nobody to give it to.
+void test_without_a_server_no_measure_is_kept() {
+  Tank tank;
+  OnlineSystem sys(true, nullptr, 1500, {&tank});
+  for (int i = 1; i <= 4; ++i) {
+    tank.measure(50 - i, kThen + i * 60);
+    sys.advance(300);
+  }
+  Doc doc(sys.kernel(), "mod.tank");
+  TEST_ASSERT_EQUAL_INT64(kThen + 240, doc.v["things"]["at"]["level"].asInt());
+  TEST_ASSERT_FALSE(doc.v["things"]["kept"].valid());
+  // The command is there all the same, and gives nothing.
+  Json<512> out;
+  TEST_ASSERT_TRUE(sys.kernel().commands().answer("mod.tank", "things.kept", "{}", ArgsForm::Json,
+                                                  CmdSource::Local, out.w) == Status::Ok);
+  TEST_ASSERT_EQUAL_UINT(0, out.parse()["result"]["items"].size());
+}
+
 void test_device_and_server_stay_in_step() {
   OnlineSystem sys;
   Console console(sys);
@@ -680,6 +890,9 @@ int main(int, char**) {
   RUN_TEST(test_detach);
   RUN_TEST(test_the_server_has_what_the_console_reads);
   RUN_TEST(test_the_things_of_the_modules_reach_the_server);
+  RUN_TEST(test_measures_made_with_the_server_away_are_kept_for_it);
+  RUN_TEST(test_when_the_room_is_full_the_oldest_measures_go);
+  RUN_TEST(test_without_a_server_no_measure_is_kept);
   RUN_TEST(test_device_and_server_stay_in_step);
   RUN_TEST(test_events_for_the_server);
   return UNITY_END();

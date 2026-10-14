@@ -123,7 +123,7 @@
 #define LMP_MAX_TARGETS (20 + LMP_MAX_MODULES)
 #endif
 #ifndef LMP_CMD_MAX_ARGS
-#define LMP_CMD_MAX_ARGS 6
+#define LMP_CMD_MAX_ARGS 8
 #endif
 // Room for the decoded text arguments of one command.
 #ifndef LMP_CMD_TEXT
@@ -532,6 +532,12 @@
 // Parts of a module whose changes are followed one by one: the nodes of a hub.
 #ifndef LMP_THINGS_PARTS
 #define LMP_THINGS_PARTS 64
+#endif
+// Measures kept while the server of the device is away, to give them when it is back: 20 bytes
+// each, taken at the first one and given back when the server has them all. With a server and
+// nothing else: a firmware without one keeps none. 0: none is kept.
+#ifndef LMP_THINGS_KEPT
+#define LMP_THINGS_KEPT 64
 #endif
 
 // ---- Service of the product -----------------------------------------------------------------

@@ -60,6 +60,12 @@ void test_a_favourite_is_kept() {
   TEST_ASSERT_EQUAL_INT(1, doc.v["favs"].asInt());
   TEST_ASSERT_TRUE(doc.v["max"].asInt() >= 30);
   TEST_ASSERT_TRUE(has(box.result("favs", "{}"), "Rai Radio 2"));
+  // Who reads the device without knowing the module finds how many stations it keeps, and
+  // how many it can keep.
+  TEST_ASSERT_EQUAL_INT64(1, doc.v["things"]["values"]["favs"].asInt(-1));
+  const std::string things = box.result("things", "{}");
+  TEST_ASSERT_TRUE(has(things, "\"id\":\"favs\",\"kind\":\"number\""));
+  TEST_ASSERT_TRUE(has(things, ("\"min\":0,\"max\":" + std::to_string(doc.v["max"].asInt())).c_str()));
 }
 
 void test_a_new_favourite_wants_a_name_and_an_address() {

@@ -3,6 +3,11 @@
 What each version fixes and adds. The newest on top. Written in English: the notes are
 shown as they are, in the console and on the server.
 
+## 1.0.5 (2026-10-14)
+
+- The city and the degrees can be set from Home Assistant, as a text and a select
+- The numbers of the weather tell when they were read, and the humidity tells its limits
+
 ## 1.0.4 (2026-10-11)
 
 - No change in how it works: comments and texts of the code

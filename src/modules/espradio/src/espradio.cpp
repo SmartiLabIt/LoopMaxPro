@@ -178,7 +178,7 @@ class Settings final : public lmp::sdk::ModuleConfig<Cfg> {
 };
 
 class EspRadio final : public lmp::sdk::Module {
-  LMP_MODULE("espradio", "EspRadio", "\xF0\x9F\x93\xBB", "1.0.3", lmp::sdk::ModuleKind::Online, 0)
+  LMP_MODULE("espradio", "EspRadio", "\xF0\x9F\x93\xBB", "1.0.4", lmp::sdk::ModuleKind::Online, 0)
 
  public:
   Status onInit(lmp::sdk::ModuleContext& c) override {
@@ -187,7 +187,8 @@ class EspRadio final : public lmp::sdk::Module {
     c.commands->add("favs", LMP_HELP("The favourite stations, a page at a time"), kFromArgs,
                     [this](const lmp::Args& a, lmp::CmdContext& ctx) -> Status {
                       return list(a.has("from") ? a.u16("from") : 0, ctx);
-                    });
+                    },
+                    lmp::kCmdReadOnly);
     c.commands->add("fav.set", LMP_HELP("A favourite station, new or changed: name, address, category, logo, info"),
                     kSetArgs,
                     [this](const lmp::Args& a, lmp::CmdContext& ctx) -> Status { return set(a, ctx); });
@@ -212,6 +213,13 @@ class EspRadio final : public lmp::sdk::Module {
   }
 
   void onSettings() { markChanged(); }
+
+  // What a home system reads of the module (sdk/home.h): how many stations it keeps. The
+  // sound is of the browser that looks at the page: here there is nothing to turn on or off.
+  void things(lmp::sdk::ThingSink& out) const override {
+    out.range(0, kFavMax);
+    out.number("favs", {"Favourite stations", "Stazioni preferite"}, count_);
+  }
 
  private:
   Status list(uint16_t from, lmp::CmdContext& ctx) {

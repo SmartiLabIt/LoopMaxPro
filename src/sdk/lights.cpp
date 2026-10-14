@@ -13,6 +13,18 @@ constexpr const char* kEffectNames[] = {"christmas", "rainbow", "breath", "blink
 static_assert(sizeof(kEffectNames) / sizeof(kEffectNames[0]) ==
               static_cast<size_t>(LightEffect::Count), "a name for every effect");
 
+// What a home system chooses among (sdk/home.h): the fixed colour, then the effects in their
+// order, with the ids of the command "effect".
+constexpr ThingOption kEffectChoices[] = {
+    {"color", {"Fixed colour", "Colore fisso"}}, {"christmas", {"Christmas", "Natale"}},
+    {"rainbow", {"Rainbow", "Arcobaleno"}},      {"breath", {"Breath", "Respiro"}},
+    {"blink", {"Blink", "Lampeggio"}},           {"fade", {"Fade", "Dissolvenza"}},
+    {"chase", {"Chase", "Inseguimento"}},        {"wheel", {"Wheel", "Ruota"}},
+    {"comet", {"Comet", "Cometa"}},              {"sparkle", {"Sparkle", "Scintille"}},
+};
+static_assert(sizeof(kEffectChoices) / sizeof(kEffectChoices[0]) ==
+              static_cast<size_t>(LightEffect::Count) + 1, "a choice for every effect");
+
 // How often a frame of pixels that does not change is sent again.
 constexpr uint32_t kPixelsAgainMs = 2000;
 
@@ -345,21 +357,76 @@ void LightsBase::things(ThingSink& sink) const {
     const Light& l = state_[i];
     const PinEntry* channel = bank_.entry(i);
     snprintf(id, sizeof(id), "light%u", static_cast<unsigned>(i));
-    sink.light(id, channel ? channel->name.c_str() : l.spec.name, l.on, l.brightness, l.color.r,
-               l.color.g, l.color.b, true);
+    const char* light = channel ? channel->name.c_str() : l.spec.name;
+    sink.light(id, light, l.on, l.brightness, l.color.r, l.color.g, l.color.b, true);
+    // The effect and its speed, to choose and to set: "effect0", "speed0". With more than one
+    // light their names say whose they are.
+    char en[48], it[48];
+    snprintf(id, sizeof(id), "effect%u", static_cast<unsigned>(i));
+    if (count_ > 1) {
+      snprintf(en, sizeof(en), "%s: effect", light);
+      snprintf(it, sizeof(it), "%s: effetto", light);
+    } else {
+      snprintf(en, sizeof(en), "Effect");
+      snprintf(it, sizeof(it), "Effetto");
+    }
+    sink.settable();
+    sink.choice(id, {en, it}, l.effect < 0 ? "color" : kEffectNames[l.effect], kEffectChoices,
+                l.spec.kind == LightKind::Pixels ? static_cast<uint8_t>(LightEffect::Count) + 1
+                                                 : kStripEffects + 1);
+    snprintf(id, sizeof(id), "speed%u", static_cast<unsigned>(i));
+    if (count_ > 1) {
+      snprintf(en, sizeof(en), "%s: speed", light);
+      snprintf(it, sizeof(it), "%s: velocit\xC3\xA0", light);
+    } else {
+      snprintf(en, sizeof(en), "Effect speed");
+      snprintf(it, sizeof(it), "Velocit\xC3\xA0 dell'effetto");
+    }
+    sink.settable(1, 100, 1);
+    sink.number(id, {en, it}, l.speed);
   }
 }
 
-Status LightsBase::thingSet(const char* id, const ThingAsk& ask) {
-  if (!declared_ || strncmp(id, "light", 5) != 0 || id[5] < '0' || id[5] > '9') {
-    return Status::NotFound;
-  }
+// The number that ends an id as "light0", "effect1": the light it is of. -1 when the id is
+// not made so, or there is no such light.
+int LightsBase::lightOfId(const char* id, const char* word) const {
+  const size_t length = strlen(word);
+  if (strncmp(id, word, length) != 0 || id[length] < '0' || id[length] > '9') return -1;
   unsigned light = 0;
-  for (const char* c = id + 5; *c; ++c) {
-    if (*c < '0' || *c > '9' || light > 99) return Status::NotFound;
+  for (const char* c = id + length; *c; ++c) {
+    if (*c < '0' || *c > '9' || light > 99) return -1;
     light = light * 10 + static_cast<unsigned>(*c - '0');
   }
-  if (light >= count_) return Status::NotFound;
+  return light < count_ ? static_cast<int>(light) : -1;
+}
+
+Status LightsBase::thingSet(const char* id, const ThingAsk& ask) {
+  if (!declared_) return Status::NotFound;
+  int which = lightOfId(id, "effect");
+  if (which >= 0) {
+    // What arrives is one of the choices of this light: the fixed colour, or an effect.
+    Light& l = state_[which];
+    const int e = lightEffectOf(ask.text);
+    if (e < 0) {
+      l.effect = -1;
+      unsaved();
+      return Status::Ok;
+    }
+    if (!effectFits(l, e)) return Status::Invalid;
+    l.effect = static_cast<int8_t>(e);
+    l.startMs = nowMs_;
+    memset(l.spark, 0, sizeof(l.spark));
+    return turnOn(static_cast<uint8_t>(which));
+  }
+  which = lightOfId(id, "speed");
+  if (which >= 0) {
+    state_[which].speed = static_cast<uint8_t>(ask.number);
+    unsaved();
+    return Status::Ok;
+  }
+  which = lightOfId(id, "light");
+  if (which < 0) return Status::NotFound;
+  const unsigned light = static_cast<unsigned>(which);
   Light& l = state_[light];
   if (ask.hasBrightness) {
     l.brightness = ask.brightness < 1 ? 1 : (ask.brightness > 100 ? 100 : ask.brightness);

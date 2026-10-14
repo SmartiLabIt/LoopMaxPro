@@ -31,6 +31,9 @@
 #if LMP_FEATURE_GEO
 #include "services/geo/geo_service.h"
 #endif
+#if LMP_FEATURE_CLOUD
+#include "services/cloud/cloud_service.h"
+#endif
 #include "kernel/service/product.h"
 
 #define LMP_MODULE_JOIN_(a, b) a##b
@@ -60,15 +63,25 @@ constexpr ArgSpec kThingValuesArgs[] = {
     Arg::u16("from").optional(),
 };
 
-// value: "ON", "OFF", "PRESS". A light takes brightness, from 1 to 100, and its colour too.
+// value: "ON", "OFF", "PRESS"; for a thing that can be set, its text or the id of one of its
+// values. A light takes brightness, from 1 to 100, and its colour too. number: for a number
+// that can be set.
 constexpr ArgSpec kThingSetArgs[] = {
     Arg::str("thing", 1, 40),
-    Arg::str("value", 0, 8).optional(),
+    Arg::str("value", 0, sdk::kThingTextMax).optional(),
     Arg::u8("brightness", 1, 100).optional(),
     Arg::u8("r").optional(),
     Arg::u8("g").optional(),
     Arg::u8("b").optional(),
+    Arg::f64("number").optional(),
 };
+
+// after: the last measure the asker has. Those up to it are forgotten.
+constexpr ArgSpec kThingKeptArgs[] = {
+    Arg::u32("after").optional(),
+};
+// Measures in an answer.
+constexpr size_t kKeptPage = 12;
 #endif
 
 using ModuleGetter = sdk::Module& (*)();
@@ -191,6 +204,9 @@ ModulesService::~ModulesService() {
   }
   hal::freeLarge(file_);
   delete[] pending_;
+#if LMP_FEATURE_THINGS
+  hal::freeLarge(kept_);
+#endif
 }
 
 Status ModulesService::start(Kernel& kernel) {
@@ -444,13 +460,110 @@ void ModulesService::describeThings(const Slot& slot, JsonWriter& w) {
   w.beginObject("values");
   sdk::thingsOwnValues(*slot.module, w);
   w.endObject();
+  sdk::thingsOwnTimes(*slot.module, w);
   if (slot.things.parts()) w.u32("parts", slot.things.parts());
+  // Measures made while the server was away, waiting for it to ask: things.kept.
+  if (slot.kept) w.u32("kept", slot.kept);
   w.endObject();
 #else
   (void)slot;
   (void)w;
 #endif
 }
+
+#if LMP_FEATURE_THINGS
+
+bool ModulesService::serverAway() const {
+#if LMP_FEATURE_CLOUD
+  if (LMP_THINGS_KEPT == 0) return false;
+  const ICloudService* cloud = kernel_->api<ICloudService>();
+  return cloud && cloud->attached() && !cloud->connected();
+#else
+  return false;
+#endif
+}
+
+void ModulesService::dropKept(uint16_t place) {
+  const uint8_t module = kept_[place].module;
+  if (module < count_ && slots_[module].kept) --slots_[module].kept;
+  memmove(kept_ + place, kept_ + place + 1, sizeof(Kept) * (keptCount_ - place - 1u));
+  if (--keptCount_ == 0) {
+    // The server has them all: the room goes back.
+    hal::freeLarge(kept_);
+    kept_ = nullptr;
+  }
+}
+
+void ModulesService::keep(uint8_t module, uint32_t key, double value, uint32_t at) {
+  if (!kept_) kept_ = static_cast<Kept*>(hal::allocLarge(sizeof(Kept) * LMP_THINGS_KEPT));
+  if (!kept_) {
+    ++keptLost_;
+    return;
+  }
+  if (keptCount_ >= LMP_THINGS_KEPT) {
+    // No room: the oldest one goes, whatever module it is of.
+    const uint8_t oldest = kept_[0].module;
+    if (oldest < count_ && slots_[oldest].kept) --slots_[oldest].kept;
+    memmove(kept_, kept_ + 1, sizeof(Kept) * (keptCount_ - 1u));
+    --keptCount_;
+    if (keptLost_++ == 0) LMP_LOGW(src_, "measures kept for the server: no more room, the oldest go");
+  }
+  Kept& k = kept_[keptCount_++];
+  k.seq = ++keptSeq_;
+  k.at = at;
+  k.key = key;
+  k.value = static_cast<float>(value);
+  k.module = module;
+  ++slots_[module].kept;
+}
+
+Status ModulesService::tellKept(Slot& slot, const Args& a, CmdContext& ctx) {
+  const uint8_t module = static_cast<uint8_t>(&slot - slots_);
+  if (a.has("after")) {
+    const uint32_t after = a.u32("after");
+    for (uint16_t i = keptCount_; i > 0; --i) {
+      if (kept_[i - 1].module == module && kept_[i - 1].seq <= after) dropKept(static_cast<uint16_t>(i - 1));
+    }
+  }
+  // A page of the ones left, the oldest first.
+  uint32_t keys[kKeptPage];
+  uint16_t places[kKeptPage];
+  size_t n = 0;
+  for (uint16_t i = 0; i < keptCount_ && n < kKeptPage; ++i) {
+    if (kept_[i].module != module) continue;
+    keys[n] = kept_[i].key;
+    places[n++] = i;
+  }
+  sdk::ThingRef refs[kKeptPage];
+  if (n) sdk::thingsResolve(*slot.module, keys, refs, n);
+  if (ctx.result) {
+    JsonWriter& w = *ctx.result;
+    w.beginArray("items");
+    for (size_t i = 0; i < n; ++i) {
+      if (!refs[i].found) continue;
+      const Kept& k = kept_[places[i]];
+      w.beginObject();
+      w.u32("seq", k.seq);
+      w.str("thing", refs[i].thing);
+      if (refs[i].part[0]) w.str("part", refs[i].part);
+      w.f64("value", k.value, refs[i].decimals);
+      w.u32("at", k.at);
+      w.endObject();
+    }
+    w.endArray();
+  }
+  // A measure of a number that is no longer there can be told to nobody: it goes.
+  for (size_t i = n; i > 0; --i) {
+    if (!refs[i - 1].found) dropKept(places[i - 1]);
+  }
+  if (ctx.result) {
+    ctx.result->u32("kept", slot.kept);
+    if (keptLost_) ctx.result->u32("lost", keptLost_);
+  }
+  return Status::Ok;
+}
+
+#endif  // LMP_FEATURE_THINGS
 
 void ModulesService::addThingCommands(Slot& slot) {
 #if LMP_FEATURE_THINGS
@@ -462,7 +575,8 @@ void ModulesService::addThingCommands(Slot& slot) {
         if (!works(*self)) return Status::Denied;
         if (ctx.result) sdk::thingsDescribe(*self->module, self->things, a.u16("from"), *ctx.result);
         return Status::Ok;
-      });
+      },
+      kCmdReadOnly);
   slot.commands->add(
       "things.values",
       LMP_HELP("The values of the parts of the module changed since a rev, a page at a time"),
@@ -473,14 +587,27 @@ void ModulesService::addThingCommands(Slot& slot) {
                                 *ctx.result);
         }
         return Status::Ok;
-      });
+      },
+      kCmdReadOnly);
   slot.commands->add(
       "thing.set", LMP_HELP("Turns, presses or sets one of the things of the module"),
       kThingSetArgs, [self](const Args& a, CmdContext& ctx) -> Status {
         if (!works(*self)) return Status::Denied;
         const Status s = sdk::thingsSet(*self->module, a);
-        if (s == Status::NotFound) ctx.errorField = "thing";
+        if (s == Status::NotFound) {
+          ctx.errorField = "thing";
+        } else if (s == Status::Invalid && (a.has("number") || a.has("value"))) {
+          // A value the thing does not take: out of its limits, not among its values.
+          ctx.errorField = a.has("number") ? "number" : "value";
+        }
         return s;
+      });
+  Slot* own = &slot;
+  slot.commands->add(
+      "things.kept",
+      LMP_HELP("The measures made while the server was away, the oldest first. after: the last one the asker has, forgotten with those before it"),
+      kThingKeptArgs, [this, own](const Args& a, CmdContext& ctx) -> Status {
+        return tellKept(*own, a, ctx);
       });
 #else
   (void)slot;
@@ -546,7 +673,19 @@ void ModulesService::follow(Slot& slot, size_t index, uint32_t nowMs) {
     slot.dataDue = false;
 #if LMP_FEATURE_THINGS
     // Before the news goes out: who reads the document finds the things as they are now.
-    if (works(slot)) slot.things.look(m);
+    // With the server away, what was measured since the look of before is kept for it.
+    if (works(slot)) {
+      struct Taker final : sdk::ThingMeasures {
+        ModulesService* host = nullptr;
+        uint8_t module = 0;
+        void measure(uint32_t key, double value, uint32_t at) override {
+          host->keep(module, key, value, at);
+        }
+      } taker;
+      taker.host = this;
+      taker.module = id;
+      slot.things.look(m, serverAway() ? &taker : nullptr);
+    }
 #endif
     kernel_->events().publish(Event(EventId::ModuleData, id));
   }

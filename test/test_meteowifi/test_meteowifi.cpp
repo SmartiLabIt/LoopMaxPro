@@ -477,6 +477,81 @@ void test_fahrenheit() {
   TEST_ASSERT_TRUE(doc.v["config"]["fahrenheit"].asBool());
 }
 
+// The city and the degrees are things that can be set (sdk/home.h): who commands the device
+// without knowing the module, a home system or a server, sets them as it sets every thing.
+void test_the_city_and_the_degrees_are_set_as_things() {
+  Meteo m;
+  Json<4096> out;
+  TEST_ASSERT_TRUE(m.sys.kernel().commands().answer("mod.meteowifi", "things", "{}", ArgsForm::Json,
+                                                    CmdSource::Remote, out.w) == Status::Ok);
+  const JsonValue things = out.parse()["result"]["things"];
+  TEST_ASSERT_EQUAL_UINT(7, things.size());
+  // The humidity says from where to where it goes.
+  TEST_ASSERT_TRUE(things.at(2)["id"].stringEquals("humidity"));
+  TEST_ASSERT_EQUAL_INT64(100, things.at(2)["max"].asInt(-1));
+  TEST_ASSERT_TRUE(things.at(5)["id"].stringEquals("place"));
+  TEST_ASSERT_TRUE(things.at(5)["kind"].stringEquals("text"));
+  TEST_ASSERT_TRUE(things.at(5)["writable"].asBool(false));
+  TEST_ASSERT_EQUAL_INT64(48, things.at(5)["max"].asInt(-1));
+  TEST_ASSERT_TRUE(things.at(6)["id"].stringEquals("units"));
+  TEST_ASSERT_TRUE(things.at(6)["kind"].stringEquals("select"));
+  TEST_ASSERT_TRUE(things.at(6)["writable"].asBool(false));
+  TEST_ASSERT_EQUAL_UINT(2, things.at(6)["options"].size());
+  TEST_ASSERT_TRUE(things.at(6)["options"].at(1)["id"].stringEquals("F"));
+  TEST_ASSERT_TRUE(things.at(6)["options"].at(1)["name"].stringEquals("Fahrenheit"));
+
+  // A city: looked for as with the command, and found it is the value.
+  TEST_ASSERT_TRUE(m.sys.command("mod.meteowifi", "thing.set",
+                                 "{\"thing\":\"place\",\"value\":\"Milano\"}") == Status::Ok);
+  m.sys.advance(4000);
+  {
+    Doc doc(m.sys.kernel(), "mod.meteowifi");
+    TEST_ASSERT_TRUE(doc.v["things"]["values"]["place"].stringEquals("Milano, IT"));
+    TEST_ASSERT_TRUE(doc.v["things"]["values"]["units"].stringEquals("C"));
+    TEST_ASSERT_TRUE(has(m.last("http://api.open-meteo.com"), "latitude=45.4643"));
+  }
+  // The degrees: one of the two, and no other word.
+  const char* field = nullptr;
+  TEST_ASSERT_TRUE(m.sys.command("mod.meteowifi", "thing.set",
+                                 "{\"thing\":\"units\",\"value\":\"K\"}", &field) == Status::Invalid);
+  TEST_ASSERT_EQUAL_STRING("value", field);
+  TEST_ASSERT_TRUE(m.sys.command("mod.meteowifi", "thing.set",
+                                 "{\"thing\":\"units\",\"value\":\"F\"}") == Status::Ok);
+  m.sys.advance(2000);
+  TEST_ASSERT_TRUE(has(m.last("http://api.open-meteo.com"), "&temperature_unit=fahrenheit"));
+  {
+    Doc doc(m.sys.kernel(), "mod.meteowifi");
+    TEST_ASSERT_TRUE(doc.v["things"]["values"]["units"].stringEquals("F"));
+    TEST_ASSERT_TRUE(doc.v["config"]["fahrenheit"].asBool());
+  }
+  // Emptied: back to the place of the device.
+  TEST_ASSERT_TRUE(m.sys.command("mod.meteowifi", "thing.set", "{\"thing\":\"place\",\"value\":\"\"}") ==
+                   Status::Ok);
+  m.sys.advance(500);
+  Doc doc(m.sys.kernel(), "mod.meteowifi");
+  TEST_ASSERT_TRUE(doc.v["things"]["values"]["place"].stringEquals(""));
+  TEST_ASSERT_FALSE(doc.v["place"].valid());
+}
+
+// The numbers of the weather say when they were read: who reads the module as data tells a
+// forecast that stays the same from a service that answers no more.
+void test_the_weather_says_when_it_was_read() {
+  Meteo m;
+  TEST_ASSERT_TRUE(m.sys.app.clock().setTime(kSomeTime, TimeSource::Client) == Status::Ok);
+  TEST_ASSERT_TRUE(m.sys.command("mod.meteowifi", "config.set",
+                                 "{\"place\":\"Roma\",\"lat\":41.9,\"lon\":12.5}") == Status::Ok);
+  m.sys.advance(3000);
+  Doc doc(m.sys.kernel(), "mod.meteowifi");
+  const JsonValue at = doc.v["things"]["at"];
+  TEST_ASSERT_TRUE_MESSAGE(at.valid(), doc.text());
+  TEST_ASSERT_EQUAL_UINT(4, at.size());
+  const int64_t read = at["temperature"].asInt();
+  TEST_ASSERT_TRUE(read >= kSomeTime && read < kSomeTime + 10);
+  TEST_ASSERT_EQUAL_INT64(read, at["feels"].asInt());
+  TEST_ASSERT_EQUAL_INT64(read, at["humidity"].asInt());
+  TEST_ASSERT_EQUAL_INT64(read, at["wind"].asInt());
+}
+
 void test_a_server_that_fails_is_asked_again_a_minute_later() {
   Meteo m;
   m.sys.pc().httpClient.when(kForecast, 500, "");
@@ -517,6 +592,8 @@ int main(int, char**) {
   RUN_TEST(test_nothing_found);
   RUN_TEST(test_a_search_service_that_does_not_answer);
   RUN_TEST(test_fahrenheit);
+  RUN_TEST(test_the_city_and_the_degrees_are_set_as_things);
+  RUN_TEST(test_the_weather_says_when_it_was_read);
   RUN_TEST(test_a_server_that_fails_is_asked_again_a_minute_later);
   return UNITY_END();
 }

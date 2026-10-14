@@ -153,6 +153,60 @@ void test_effects() {
   TEST_ASSERT_TRUE(Doc(s.sys.kernel(), "mod.rgb").v["lights"].at(0)["mode"].stringEquals("color"));
 }
 
+// The effect and its speed are things too (sdk/home.h): chosen and set as every thing, by who
+// commands the device without knowing the module.
+void test_the_effect_and_its_speed_are_things() {
+  Strip s;
+  Json<4096> out;
+  TEST_ASSERT_TRUE(s.sys.kernel().commands().answer("mod.rgb", "things", "{}", ArgsForm::Json,
+                                                    CmdSource::Remote, out.w) == Status::Ok);
+  const JsonValue things = out.parse()["result"]["things"];
+  TEST_ASSERT_EQUAL_UINT(3, things.size());
+  TEST_ASSERT_TRUE(things.at(0)["id"].stringEquals("light0"));
+  // A strip has the fixed colour and the five effects of every light, not those of the LEDs.
+  TEST_ASSERT_TRUE(things.at(1)["id"].stringEquals("effect0"));
+  TEST_ASSERT_TRUE(things.at(1)["kind"].stringEquals("select"));
+  TEST_ASSERT_TRUE(things.at(1)["writable"].asBool(false));
+  TEST_ASSERT_TRUE(things.at(1)["name"]["en"].stringEquals("Effect"));
+  TEST_ASSERT_EQUAL_UINT(6, things.at(1)["options"].size());
+  TEST_ASSERT_TRUE(things.at(1)["options"].at(0)["id"].stringEquals("color"));
+  TEST_ASSERT_TRUE(things.at(1)["options"].at(5)["id"].stringEquals("fade"));
+  TEST_ASSERT_TRUE(things.at(2)["id"].stringEquals("speed0"));
+  TEST_ASSERT_TRUE(things.at(2)["kind"].stringEquals("number"));
+  TEST_ASSERT_TRUE(things.at(2)["writable"].asBool(false));
+  TEST_ASSERT_EQUAL_INT64(1, things.at(2)["min"].asInt(-1));
+  TEST_ASSERT_EQUAL_INT64(100, things.at(2)["max"].asInt(-1));
+
+  // An effect chosen: the strip turns on with it, as with the command.
+  TEST_ASSERT_TRUE(s.cmd("thing.set", "{\"thing\":\"effect0\",\"value\":\"christmas\"}") == Status::Ok);
+  s.sys.advance(100);
+  TEST_ASSERT_EQUAL_UINT32(kFull, s.duty(kR));
+  {
+    Doc doc(s.sys.kernel(), "mod.rgb");
+    TEST_ASSERT_TRUE(doc.v["lights"].at(0)["on"].asBool());
+    TEST_ASSERT_TRUE(doc.v["lights"].at(0)["effect"].stringEquals("christmas"));
+    TEST_ASSERT_TRUE(doc.v["things"]["values"]["effect0"].stringEquals("christmas"));
+    TEST_ASSERT_EQUAL_INT64(50, doc.v["things"]["values"]["speed0"].asInt());
+  }
+  // Its speed, within its limits.
+  TEST_ASSERT_TRUE(s.cmd("thing.set", "{\"thing\":\"speed0\",\"number\":100}") == Status::Ok);
+  const char* field = nullptr;
+  TEST_ASSERT_TRUE(s.cmd("thing.set", "{\"thing\":\"speed0\",\"number\":0}", &field) == Status::Invalid);
+  TEST_ASSERT_EQUAL_STRING("number", field);
+  TEST_ASSERT_EQUAL_INT64(100, Doc(s.sys.kernel(), "mod.rgb").v["lights"].at(0)["speed"].asInt());
+  // An effect of the LEDs is not for a strip, and a word that is none is not taken.
+  TEST_ASSERT_TRUE(s.cmd("thing.set", "{\"thing\":\"effect0\",\"value\":\"comet\"}", &field) ==
+                   Status::Invalid);
+  TEST_ASSERT_EQUAL_STRING("value", field);
+  TEST_ASSERT_TRUE(s.cmd("thing.set", "{\"thing\":\"effect0\",\"value\":\"disco\"}") == Status::Invalid);
+  // The fixed colour ends the effect.
+  TEST_ASSERT_TRUE(s.cmd("thing.set", "{\"thing\":\"effect0\",\"value\":\"color\"}") == Status::Ok);
+  s.sys.advance(100);
+  Doc doc(s.sys.kernel(), "mod.rgb");
+  TEST_ASSERT_TRUE(doc.v["lights"].at(0)["mode"].stringEquals("color"));
+  TEST_ASSERT_TRUE(doc.v["things"]["values"]["effect0"].stringEquals("color"));
+}
+
 // ---------------------------------------------------------------- schedules
 
 void test_a_schedule_turns_the_strip_on() {
@@ -339,6 +393,36 @@ void test_leaf_and_ring_are_two_lights() {
   TEST_ASSERT_EQUAL_STRING("name", field);
 }
 
+// With two lights each has its effect and its speed to choose, and their names say whose.
+void test_each_light_has_its_effect_to_choose() {
+  Leaf s;
+  Json<8192> out;
+  TEST_ASSERT_TRUE(s.sys.kernel().commands().answer("mod.ganjaleaf", "things", "{}", ArgsForm::Json,
+                                                    CmdSource::Remote, out.w) == Status::Ok);
+  TEST_ASSERT_TRUE_MESSAGE(out.w.complete(), "the things of two lights fit in an answer");
+  const JsonValue things = out.parse()["result"]["things"];
+  TEST_ASSERT_EQUAL_UINT(6, things.size());
+  TEST_ASSERT_TRUE(things.at(1)["id"].stringEquals("effect0"));
+  TEST_ASSERT_TRUE(things.at(1)["name"]["en"].stringEquals("Leaf: effect"));
+  TEST_ASSERT_EQUAL_UINT(6, things.at(1)["options"].size());
+  TEST_ASSERT_TRUE(things.at(4)["id"].stringEquals("effect1"));
+  TEST_ASSERT_TRUE(things.at(4)["name"]["it"].stringEquals("Ring: effetto"));
+  // The ring is a line of LEDs: it has their effects too.
+  TEST_ASSERT_EQUAL_UINT(10, things.at(4)["options"].size());
+  TEST_ASSERT_TRUE(things.at(4)["options"].at(9)["id"].stringEquals("sparkle"));
+  TEST_ASSERT_TRUE(things.at(5)["id"].stringEquals("speed1"));
+
+  TEST_ASSERT_TRUE(s.cmd("thing.set", "{\"thing\":\"effect1\",\"value\":\"chase\"}") == Status::Ok);
+  TEST_ASSERT_TRUE(s.cmd("thing.set", "{\"thing\":\"effect0\",\"value\":\"chase\"}") == Status::Invalid);
+  TEST_ASSERT_TRUE(s.cmd("thing.set", "{\"thing\":\"speed1\",\"number\":80}") == Status::Ok);
+  s.sys.advance(100);
+  Doc doc(s.sys.kernel(), "mod.ganjaleaf");
+  TEST_ASSERT_TRUE(doc.v["lights"].at(1)["effect"].stringEquals("chase"));
+  TEST_ASSERT_EQUAL_INT64(80, doc.v["lights"].at(1)["speed"].asInt());
+  TEST_ASSERT_EQUAL_INT64(50, doc.v["lights"].at(0)["speed"].asInt());
+  TEST_ASSERT_TRUE(doc.v["lights"].at(0)["mode"].stringEquals("color"));
+}
+
 void test_the_effects_of_the_ring() {
   Leaf s;
   // Chase: eleven on and one dark, the dark one moving every 100 ms at speed 50.
@@ -438,10 +522,12 @@ int main(int, char**) {
   RUN_TEST(test_brightness);
   RUN_TEST(test_on_and_off_keep_the_colour);
   RUN_TEST(test_effects);
+  RUN_TEST(test_the_effect_and_its_speed_are_things);
   RUN_TEST(test_a_schedule_turns_the_strip_on);
   RUN_TEST(test_it_comes_back_after_a_restart);
   RUN_TEST(test_pwm_of_the_pin_service);
   RUN_TEST(test_leaf_and_ring_are_two_lights);
+  RUN_TEST(test_each_light_has_its_effect_to_choose);
   RUN_TEST(test_the_effects_of_the_ring);
   RUN_TEST(test_each_light_has_its_schedules);
   RUN_TEST(test_leds_of_the_pin_service);

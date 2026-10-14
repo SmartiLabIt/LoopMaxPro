@@ -60,7 +60,8 @@ How a module is made is told in [Writing a module](../../../docs/writing-a-modul
 - **On the display**: the sky as a 48 x 48 picture, the temperature in large digits, the
   humidity. Eight skies: clear, clear night, cloudy, fog, rain, rain at night, storm, snow.
 - **The display is found by itself** on the boards that carry it on one of two pairs of pins.
-- **Home Assistant**: four sensors and a button, on the ESP32 family.
+- **Home Assistant**: four sensors and a button; the city and the degrees can be set from
+  there. On the ESP32 family.
 
 <h2 id="hardware"><img src="../../../docs/assets/h/hardware.svg" alt="Hardware" height="24"></h2>
 
@@ -288,5 +289,16 @@ not of the ESP8266 boards.
 | `humidity` Humidity | sensor | % |
 | `wind` Wind | sensor | km/h |
 | `refresh` Refresh the weather | button | |
+| `place` City | text | to write, 48 characters at most |
+| `units` Degrees | select | `C` or `F` |
+
+The city and the degrees are set from Home Assistant as in the console. A city written there
+is looked for by the device, and when it is found its name becomes the value; left empty, the
+weather is the one of the position of the device. An automation can so follow who moves: the
+weather of the place of work in the morning, of home in the evening.
+
+For who reads the module as data, through the HTTP API or a server, the humidity tells its
+limits (0 to 100) and each of the four numbers tells when it was read: a forecast that stays
+the same is told from a service that no longer answers.
 
 More in [Discovery, MQTT and Home Assistant](../../../docs/network-and-home-assistant.md).

@@ -39,7 +39,7 @@ to run the same OS on as many boards as possible.
 | **Two editions** | The normal edition for the ESP32 family, a light edition for the boards with little memory. A module asks the system for its own values on a board without touching the OS. |
 | **A console in the device** | A web app served by the board itself, made for the phone first, in English and Italian. No cloud and no app to install: open the address of the device. |
 | **Modules that only say what they are** | A module declares its state, its settings and its commands. The system carries them to the console, to HTTP, to MQTT and to the serial port, and draws a standard page for them. A module can bring a page of its own in one file. |
-| **Ready for the house** | Devices announce themselves on the network and find each other. With an MQTT broker they show up in Home Assistant by themselves. |
+| **Ready for the house** | Devices announce themselves on the network and find each other. With an MQTT broker they show up in Home Assistant by themselves: switches, lights, sensors and buttons, and what can be set, a number, a choice, a text. From there, automations, dashboards and the voice assistants. |
 | **Native data, JSON at the borders** | Inside the engine the data are C++ structures in fixed memory; JSON exists only where the device talks to the outside. |
 | **Developed on the PC** | The whole system runs on the PC as a simulator with its console in the browser, and more than 500 tests run there without a board. |
 | **Open to a server of yours** | A cloud service waits for a bridge: a module can connect the device to any server, with one envelope for the data. Without one the device works fully on its own. |

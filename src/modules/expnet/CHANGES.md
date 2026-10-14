@@ -3,6 +3,10 @@
 What each version fixes and adds. The newest on top. Written in English: the notes are
 shown as they are, in the console and on the server.
 
+## 1.0.5 (2026-10-14)
+
+- The commands say what they are: which ones only read, which ones reach other devices of the network. Nothing changes in the page
+
 ## 1.0.4 (2026-10-11)
 
 - No change in how it works: comments of the code, and its notes on the boards in English

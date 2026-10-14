@@ -331,6 +331,12 @@ POST /api/cmd/mod.expnet/scan
 | `pc.off` | `id` | Calls the webhook that turns the PC off |
 | `notify.test` | none | Sends a test message to Telegram |
 
+The list of the commands the device gives (`GET /api/manifest/mod.expnet`) says of each one
+what it is, for a program that offers them without knowing the module: `hosts`, `makers`,
+`live`, `events` and `history` only read (`readOnly`); `scan`, `pc.wake` and `pc.off` reach
+other devices of the network (`sensitive`); `makers` and `live` serve the page of the module
+(`ui`). The others change something on the device, and say nothing.
+
 ### Helper scripts
 
 In the `tools` folder of the module, for who works on it. They need Python only.

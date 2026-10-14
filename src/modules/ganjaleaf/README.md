@@ -49,7 +49,8 @@ not part of it.
 - **Schedules for each light**: every week on the days you choose, or once; four for the leaf
   and four for the ring.
 - **After a power cut** the lights come back as they were, if you want them to.
-- **Home Assistant**: two lights with brightness and colour.
+- **Home Assistant**: two lights with brightness and colour, each with its effect to choose
+  and the speed of the effect to set.
 
 <h2 id="hardware"><img src="../../../docs/assets/h/hardware.svg" alt="Hardware" height="24"></h2>
 
@@ -249,5 +250,18 @@ the lamp appears in Home Assistant as two lights, `light0` for the leaf and `lig
 ring, each with the name of its channel: on and off, brightness and colour. A colour asked from
 there ends the effect, as the command does; in the span of a schedule turning a light on or off
 is refused.
+
+Each light has its effect to choose and the speed of the effect to set. Their names say whose
+they are, "Leaf: effect" and "Ring: effect":
+
+| Thing | In Home Assistant | |
+|-------|-------------------|---|
+| `light0`, `light1` | light | the leaf and the ring: on and off, brightness, colour |
+| `effect0` | select | the leaf: `color` for the fixed colour, `christmas`, `rainbow`, `breath`, `blink`, `fade` |
+| `effect1` | select | the ring: the same six, and `chase`, `wheel`, `comet`, `sparkle` |
+| `speed0`, `speed1` | number | the speed of the effect of each light, from 1 to 100 |
+
+So a scene can set the whole lamp in one gesture: the leaf on a fixed green, the ring on the
+comet at speed 40. An effect of the ring asked of the leaf is refused by the device.
 
 More in [Discovery, MQTT and Home Assistant](../../../docs/network-and-home-assistant.md).

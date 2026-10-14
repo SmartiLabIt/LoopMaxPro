@@ -3,6 +3,10 @@
 What each version fixes and adds. The newest on top. Written in English: the notes are
 shown as they are, in the console and on the server.
 
+## 1.0.4 (2026-10-14)
+
+- The device tells how many favourite stations it keeps, to Home Assistant and to who reads it as data
+
 ## 1.0.3 (2026-10-11)
 
 - No change in how it works: comments and texts of the code

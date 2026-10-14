@@ -2,7 +2,7 @@
   "name": "espradio",
   "kind": "online",
   "title": "EspRadio",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "icon": "📻",
   "uiApi": 1,
   "ui": "ui/espradio.js",

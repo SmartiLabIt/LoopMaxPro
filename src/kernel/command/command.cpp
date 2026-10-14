@@ -371,6 +371,10 @@ Status CommandBus::manifest(StringView target, JsonWriter& w, bool withHelp) con
     if (c.flags & kCmdConfirm) w.boolean("confirm", true);
     if (c.flags & kCmdAsync) w.boolean("async", true);
     if (c.flags & kCmdAnyArgs) w.boolean("anyArgs", true);
+    if (c.flags & kCmdReadOnly) w.boolean("readOnly", true);
+    if (c.flags & kCmdSensitive) w.boolean("sensitive", true);
+    if (c.flags & kCmdSecret) w.boolean("secret", true);
+    if (c.flags & kCmdUi) w.boolean("ui", true);
     w.beginArray("args");
     for (uint8_t a = 0; a < c.argCount; ++a) {
       const ArgSpec& spec = c.args[a];

@@ -460,15 +460,26 @@ display in `onStart`.
 void things(lmp::sdk::ThingSink& out) const override {
   const char* deg = settings_->fahrenheit ? "\xC2\xB0" "F" : "\xC2\xB0" "C";
   out.number("temperature", "Temperature", now_.temp, deg, "temperature", 1, have_);
+  out.range(0, 100);
   out.number("humidity", "Humidity", now_.humidity, "%", "humidity", 0, have_);
   out.button("refresh", "Refresh the weather");
+  out.settable(0, 48);
+  out.text("place", "City", settings_->place.c_str());
+  out.settable();
+  out.choice("units", "Degrees", settings_->fahrenheit ? "F" : "C", kUnits);
 }
 ```
 
-Three of the five things of the module, with one name each (the source gives every name in
+Five of the seven things of the module, with one name each (the source gives every name in
 English and in Italian). `have_` is false until the first forecast: the value is then "not
-known", which is not zero. The other half, `thingSet`, and what Home Assistant shows are in
+known", which is not zero. The humidity says its limits. The city and the degrees can be set
+from outside, as with the commands of step 5: `settable` says so, and what arrives in
+`thingSet` was checked already, a city of 48 characters at most and one of the two values of
+`kUnits`. The other half, `thingSet`, and what Home Assistant shows are in
 [Modules and SDK](modules-sdk.md#things-what-a-module-tells-home-automation).
+
+**Every module tells its things**: a home system, and a server that reads the device as data,
+know nothing else of it.
 
 ## Pins
 
@@ -688,7 +699,9 @@ Before calling a module done:
 - [ ] `markChanged()` only when something changed: every call is an event to the console and
       to the broker.
 - [ ] The file of the module stays under 2 KB at tier MIN and 4 KB elsewhere.
-- [ ] The ids of the things are final.
+- [ ] The module tells its things, and their ids are final.
+- [ ] Every command that only reads says `kCmdReadOnly`; one that acts outside the device says
+      `kCmdSensitive`.
 - [ ] The page of the module uses only `ctx`, and has its texts in English and in Italian.
 
 **The OS**

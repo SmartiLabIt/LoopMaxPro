@@ -626,6 +626,45 @@ void test_commands_documents() {
   TEST_ASSERT_EQUAL_STRING("[\"mod.relay\"]", list.text());
 }
 
+void test_a_command_says_what_it_is() {
+  CommandBus bus;
+  uint8_t target = 0;
+  TEST_ASSERT_TRUE(bus.addTarget("mod", "desk", DescribeFn(), target) == Status::Ok);
+  const CmdHandler ok = [](const Args&, CmdContext&) -> Status { return Status::Ok; };
+  CommandSet set = bus.commandsFor(target);
+  set.add("list", "Reads", ok, kCmdReadOnly);
+  set.add("off", "Turns a PC off", ok, kCmdSensitive | kCmdConfirm);
+  set.add("pass", "A pass for another service", ok, kCmdSecret | kCmdAsync);
+  set.add("draw", "What the page shows", ok, kCmdReadOnly | kCmdUi);
+  set.add("rename", "Changes a name", ok);
+  TEST_ASSERT_TRUE(set.ok());
+
+  Json<2048> man;
+  TEST_ASSERT_TRUE(bus.manifest("mod.desk", man.w) == Status::Ok);
+  const JsonValue commands = man.parse()["commands"];
+  TEST_ASSERT_EQUAL_UINT(5, commands.size());
+  // Only reads.
+  TEST_ASSERT_TRUE(commands.at(0)["readOnly"].asBool(false));
+  TEST_ASSERT_FALSE(commands.at(0)["sensitive"].valid());
+  TEST_ASSERT_FALSE(commands.at(0)["secret"].valid());
+  TEST_ASSERT_FALSE(commands.at(0)["ui"].valid());
+  // Not to be offered lightly; what it said before is still there.
+  TEST_ASSERT_TRUE(commands.at(1)["sensitive"].asBool(false));
+  TEST_ASSERT_TRUE(commands.at(1)["confirm"].asBool(false));
+  TEST_ASSERT_FALSE(commands.at(1)["readOnly"].valid());
+  // Its answer is to keep.
+  TEST_ASSERT_TRUE(commands.at(2)["secret"].asBool(false));
+  TEST_ASSERT_TRUE(commands.at(2)["async"].asBool(false));
+  // For the page of the module.
+  TEST_ASSERT_TRUE(commands.at(3)["ui"].asBool(false));
+  TEST_ASSERT_TRUE(commands.at(3)["readOnly"].asBool(false));
+  // One that says nothing: it changes something, as every command did before.
+  TEST_ASSERT_FALSE(commands.at(4)["readOnly"].valid());
+  TEST_ASSERT_FALSE(commands.at(4)["sensitive"].valid());
+  TEST_ASSERT_FALSE(commands.at(4)["secret"].valid());
+  TEST_ASSERT_FALSE(commands.at(4)["ui"].valid());
+}
+
 void test_commands_registration_limits() {
   CommandBus bus;
   uint8_t a = 0;
@@ -885,6 +924,7 @@ int main(int, char**) {
   RUN_TEST(test_commands_from_text);
   RUN_TEST(test_commands_never_log_secrets);
   RUN_TEST(test_commands_documents);
+  RUN_TEST(test_a_command_says_what_it_is);
   RUN_TEST(test_commands_registration_limits);
   RUN_TEST(test_kernel_registers_service_targets);
   RUN_TEST(test_kernel_report_parts);

@@ -366,7 +366,7 @@ c.commands->add("pulse", LMP_HELP("Turns a channel on for the time of the settin
 ```
 
 - Arguments: `Arg::boolean`, `u8`, `u16`, `u32`, `i32`, `i64`, `f64`, `str`, `secret`, each with
-  its limits; `.optional()` for one that may be missing. At most 6 for a command. The table
+  its limits; `.optional()` for one that may be missing. At most 8 for a command. The table
   must have static storage.
 - The values arrive checked and native: `a.u8("channel")`, `a.str("name")`, `a.has("days")`.
 - The handler returns a `Status`. It writes the members of its result in `ctx.result`, when it
@@ -374,6 +374,12 @@ c.commands->add("pulse", LMP_HELP("Turns a channel on for the time of the settin
 - Flags, as the last argument: `kCmdConfirm` makes the console ask before sending;
   `kCmdAsync` is for a command that returns `Status::Pending` and ends later with the event
   `commandDone(ctx.ref, status)`.
+- Four more flags say **what the command is**, for who offers it without knowing the module (a
+  server, an app): `kCmdReadOnly`, it only reads; `kCmdSensitive`, it acts outside the device
+  or undoes what does not come back (it turns a PC off, calls an address from inside the
+  network, clears a count); `kCmdSecret`, its answer carries something to keep; `kCmdUi`, it
+  serves the page of the module only. A command that says none of them is taken as one that
+  changes something: say `kCmdReadOnly` for every command that only reads.
 - `LMP_HELP("...")` is the help text. The light edition leaves the texts out of the firmware.
 
 The same handler answers every way in:
@@ -494,8 +500,17 @@ not call a framework or a chip directly: that is what keeps it the same on every
 
 A home system is whoever puts the devices of a house together, such as Home Assistant. A
 module does not know which one: it tells its *things* one by one, with what they are now, and
-takes what it is asked ([src/sdk/home.h](../src/sdk/home.h)). This is MeteoWifi, shortened to
-three of its five things and to one name for each:
+takes what it is asked ([src/sdk/home.h](../src/sdk/home.h)).
+
+<p align="center">
+<img src="assets/img/things.svg" alt="LoopMaxPro things: a module tells its things once (switches, lights, numbers, yes or no, texts, choices, buttons); the system describes them, follows their values, checks what is set and keeps the measures with their time; Home Assistant, a server of yours and the console use them without knowing the module" width="900">
+</p>
+
+The list a module tells is used by Home Assistant
+([what you can do with it](network-and-home-assistant.md#what-you-can-do-with-it)), by a
+server through a bridge ([what a server can build on it](cloud.md#the-things-of-the-modules-for-a-server)),
+and by the console and the HTTP API. This is MeteoWifi, shortened to
+three of its seven things and to one name for each:
 
 ```cpp
 void things(lmp::sdk::ThingSink& out) const override {
@@ -520,19 +535,61 @@ lmp::Status thingSet(const char* id, const lmp::sdk::ThingAsk&) override {
 | `flag(id, name, on, kind)` | Is yes or no, to read. `kind`: `"problem"`, `"motion"`, `"occupancy"`, `"connectivity"`, `"battery"` |
 | `text(id, name, value)` | Is a word to read: a state with a name |
 | `button(id, name)` | Is pressed: it does one thing and has no state |
+| `choice(id, name, value, options)` | Is one among fixed values: a mode, an effect. `options` is a table of `ThingOption`, each with the id that travels and the name that is shown; `value` is the id of the one of now |
 | `technical()` | Marks the next thing, and only that one, as something for who looks after the device: a broken sensor, a battery |
+| `range(min, max)` | Says that the next number, and only that one, goes from `min` to `max`: what a gauge shows, where a threshold makes sense |
+| `settable(min, max, step)` | Says that the next number, text or choice, and only that one, can be set from outside. A number goes from `min` to `max` in steps of `step`; for a text `min` and `max` are its length, 64 at most; a choice needs none of them |
+| `measured(unixSeconds)` | Says when the next number, and only that one, was measured; 0 when the time is not known. For a number the module measures at a moment: a level, a reading that arrives from another device |
 | `part(id, name)` | The things that follow belong to a part of the module that is a device of its own; a null id goes back to the device itself |
 
+- **Every module tells its things**: what who uses it reads and commands. A home system, and a
+  server that reads the device as data, know nothing else of a module. A module with nothing
+  to turn on tells at least what it keeps, as EspRadio tells how many stations.
 - **The ids never change**: they are how the home system remembers a thing.
 - A name is one text, or two: the English one, then the Italian one, the two languages of the
   firmware.
 - `thingSet` receives a `ThingAsk` with only what was asked: `hasOn` and `on`,
-  `hasBrightness` and `brightness`, `hasColour` and `r`, `g`, `b`, or `press`. It answers
+  `hasBrightness` and `brightness`, `hasColour` and `r`, `g`, `b`, or `press`; for a thing
+  that can be set, `number`, or `text` (the text, or the id of the value chosen). It answers
   `NotFound` for a thing the module does not have.
+- **What is set is checked before the module sees it**, against what the thing says of
+  itself: a number out of its limits, a text too long and a value that is not among those of
+  the choice are refused and never reach `thingSet`. A number between two steps is brought to
+  the nearest one.
+- **A number that is measured says when**, with `measured`, and the module calls
+  `markChanged()` at every measure, also when the number is the same as before: who reads then
+  tells a value that stands still from a sensor that is silent. The time travels beside the
+  value (`at`). On a device with a [cloud bridge](cloud.md), a measure made while the server is
+  away is kept in memory with its time, and given to the server when it is back: nothing to
+  write in the module. Do not say it for a number that is checked many times a minute: every
+  new time is a document sent.
 - **The parts of the SDK tell theirs by themselves.** A `PinBank` tells its channels as
-  switches `ch0`, `ch1` (contacts to read, for a bank of inputs); `pins_.kind("outlet")` makes
-  them sockets. `Lights` tells each light as `light0`, `light1`. Zappy 2, RGB Controller and
-  GanjaLeaf have no `things()` of their own.
+  switches `ch0`, `ch1` (contacts to read, for a bank of inputs), and with more than one
+  channel the button `flip` that inverts them all; `pins_.kind("outlet")` makes them sockets.
+  `Lights` tells each light as `light0`, `light1`, with its effect to choose (`effect0`) and
+  the speed of the effect to set (`speed0`). Zappy 2, RGB Controller and GanjaLeaf have no
+  `things()` of their own.
+
+A thermostat, to show what can be set:
+
+```cpp
+constexpr lmp::sdk::ThingOption kModes[] = {{"eco", "Eco"}, {"comfort", "Comfort"}};
+
+void things(lmp::sdk::ThingSink& out) const override {
+  out.range(0, 100);
+  out.number("power", "Power", power_, "%");
+  out.settable(5, 30, 0.5);
+  out.number("target", "Target", target_, "\xC2\xB0" "C", "temperature", 1);
+  out.settable();
+  out.choice("mode", "Mode", mode_, kModes);
+}
+
+lmp::Status thingSet(const char* id, const lmp::sdk::ThingAsk& ask) override {
+  if (strcmp(id, "target") == 0) return setTarget(ask.number);   // within 5 and 30, on a step
+  if (strcmp(id, "mode") == 0) return setMode(ask.text);         // "eco" or "comfort"
+  return lmp::Status::NotFound;
+}
+```
 
 Things travel through the MQTT broker, in the builds that have it (tier MID and MAX). What each
 kind of thing becomes in Home Assistant, and the topics, are in
@@ -540,7 +597,13 @@ kind of thing becomes in Home Assistant, and the topics, are in
 builds every module also offers its things as data, with nothing to write
 ([src/sdk/things.h](../src/sdk/things.h)): the member `things` of its document (`gen`, which
 changes when the description changes; `rev`, which goes up when a value changes; `values`), and
-the commands `things`, `things.values` and `thing.set`.
+the commands `things`, `things.values`, `thing.set` and `things.kept`. Beside `values` there is
+`at`, with the time of measure of the numbers that say it, and `kept`, how many measures made
+with the server away wait to be asked for with `things.kept`. `things` describes each one: `id`,
+`kind` (`toggle`, `light`, `number`, `flag`, `text`, `button`, `select`), `name`, and when it
+has them `type`, `unit`, `decimals`, `min` and `max`, `step`, `options`, `writable`,
+`technical`. `thing.set` takes `thing` and `value` (`ON`, `OFF`, `PRESS`, or the text or the id
+of the choice to set), `number` for a number to set, `brightness` and `r`, `g`, `b` for a light.
 
 ## Requests from other programs
 

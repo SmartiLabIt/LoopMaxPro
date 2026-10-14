@@ -4,6 +4,17 @@ What each version fixes and adds. The newest on top. Written in English: the not
 shown as they are, in the console and on the server.
 The versions of the modules have their notes in the folder of each module.
 
+## 1.0.14 (2026-10-14)
+
+What a device shows to Home Assistant and to a server says more, and some of it can be set from there.
+
+- A number, a text and a choice among fixed values can be set from Home Assistant, each within its own limits: they appear there as a number, a text and a select
+- Each light has its effect to choose and the speed of the effect to set
+- The channels that are switched have a button that inverts them all
+- A number tells its limits and when it was measured: a value that stands still is no longer the same as a sensor that is silent
+- A device with a server keeps the measures it makes while the server cannot be reached, each with its time, and gives them when the server is back. They are kept in memory: a restart loses them
+- The list of the commands of a module says of each one whether it only reads, whether it reaches outside the device, whether its answer is to keep
+
 ## 1.0.13 (2026-10-11)
 
 Nothing changes in how a device works: what belongs to one product leaves the system and comes with the product.

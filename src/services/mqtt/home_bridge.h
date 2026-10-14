@@ -8,7 +8,8 @@
 //   <base>/home/<module>/state                       out, kept: the values of its things, JSON
 //   <base>/home/<module>/<part>/state                the same, for a part
 //   <base>/home/<module>/light/<thing>               out, kept: a light, as Home Assistant reads it
-//   <base>/home/<module>/set/<thing>                 in: ON, OFF, PRESS, or the JSON of a light
+//   <base>/home/<module>/set/<thing>                 in: ON, OFF, PRESS, the JSON of a light, or
+//                                                    the number, text or value to set
 //
 // <prefix> is "homeassistant" unless the settings say otherwise; <node> is "lmp_" and the MAC
 // address of the device. Everything is kept by the broker: Home Assistant finds it again after

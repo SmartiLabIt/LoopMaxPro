@@ -20,7 +20,29 @@
 // The parts of the SDK tell theirs by themselves: a bank of pins its channels as switches, the
 // lights as lights. The ids never change: they are how the home system remembers a thing.
 // When a module has parts that are devices of their own, every part has the same things.
+//
+// A number can say its limits, and a number, a text or a choice can be set from outside:
+//
+//     out.range(0, 100);
+//     out.number("liquid", {"Liquid", "Liquido"}, liquid_, "%");
+//     out.settable(5, 30, 0.5);
+//     out.number("target", {"Target", "Voluta"}, target_, "°C", "temperature", 1);
+//     out.settable();
+//     out.choice("mode", {"Mode", "Modo"}, mode_, kModes);
+//
+//   lmp::Status thingSet(const char* id, const lmp::sdk::ThingAsk& ask) override {
+//     if (strcmp(id, "target") == 0) return setTarget(ask.number);
+//     if (strcmp(id, "mode") == 0) return setMode(ask.text);
+//
+// What is asked is checked before the module sees it: a number out of its limits, a text too
+// long, a choice that is not among its values never reach thingSet.
+//
+// A number that is measured at a moment says when, and tells so again at every measure:
+//
+//     out.measured(liquidAt_);
+//     out.number("liquid", {"Liquid", "Liquido"}, liquid_, "%");
 #pragma once
+#include <stddef.h>
 #include <stdint.h>
 
 #include "base/status.h"
@@ -41,6 +63,15 @@ struct ThingName {
   }
 };
 
+// One of the values a choice takes: how it is written, and how it is shown.
+struct ThingOption {
+  const char* id;
+  ThingName name;
+};
+
+// The longest text that can be set.
+constexpr size_t kThingTextMax = 64;
+
 class ThingSink {
  public:
   virtual ~ThingSink() = default;
@@ -53,6 +84,30 @@ class ThingSink {
   // day: a broken sensor, a battery, a radio link. A home system keeps these apart, and does
   // not offer them to a voice assistant.
   virtual void technical() {}
+
+  // The next number, and only that one, goes from min to max: what a gauge shows, and where a
+  // threshold makes sense.
+  virtual void range(double min, double max) {
+    (void)min;
+    (void)max;
+  }
+
+  // The next number, text or choice, and only that one, can be set by who looks at it: what
+  // is asked comes in thingSet. A number goes from min to max in steps of step, and what is
+  // asked is brought to the nearest step. For a text min and max are its length, up to
+  // kThingTextMax. A choice needs none of them.
+  virtual void settable(double min = 0, double max = 0, double step = 1) {
+    (void)min;
+    (void)max;
+    (void)step;
+  }
+
+  // The next number, and only that one, was measured at this time: Unix seconds, 0 when the
+  // time is not known. Said again with a later time when the number is measured again, also
+  // when it is the same as before: who reads tells a value that stands still from a sensor
+  // that is silent. A measure made while the server of the device is away is kept, with its
+  // time, and given when the server is back (sdk/things.h).
+  virtual void measured(int64_t unixSeconds) { (void)unixSeconds; }
 
   // Something that is on or off, and can be turned. kind: "outlet" for a socket; null: a plain
   // switch.
@@ -72,6 +127,13 @@ class ThingSink {
   virtual void text(const char* id, ThingName name, const char* value) = 0;
   // Something to press: it does one thing, and has no state.
   virtual void button(const char* id, ThingName name) = 0;
+  // One among fixed values: a mode, an effect. value is the id of the one of now.
+  virtual void choice(const char* id, ThingName name, const char* value,
+                      const ThingOption* options, uint8_t count) = 0;
+  template <size_t N>
+  void choice(const char* id, ThingName name, const char* value, const ThingOption (&options)[N]) {
+    choice(id, name, value, options, static_cast<uint8_t>(N));
+  }
 };
 
 // What a home system asks of a thing. Only what is asked is there.
@@ -83,6 +145,10 @@ struct ThingAsk {
   bool hasColour = false;
   uint8_t r = 0, g = 0, b = 0;
   bool press = false;          // a button
+  bool hasNumber = false;
+  double number = 0;           // a number that can be set: within its limits, on its step
+  bool hasText = false;
+  const char* text = "";       // a text that can be set, or the id of a value of a choice
 };
 
 }  // namespace lmp::sdk

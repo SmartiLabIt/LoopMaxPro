@@ -481,7 +481,7 @@ class Settings final : public lmp::sdk::ModuleConfig<Cfg> {
 };
 
 class ExpNet final : public lmp::sdk::Module {
-  LMP_MODULE("expnet", "ExpNet", "\xF0\x9F\xA7\xB0", "1.0.4", lmp::sdk::ModuleKind::Online, kTickMs)
+  LMP_MODULE("expnet", "ExpNet", "\xF0\x9F\xA7\xB0", "1.0.5", lmp::sdk::ModuleKind::Online, kTickMs)
 
  public:
   Status onInit(lmp::sdk::ModuleContext& c) override {
@@ -819,11 +819,13 @@ class ExpNet final : public lmp::sdk::Module {
     c.commands->add("history", LMP_HELP("The last day of a service, or its week"), kHistoryArgs,
                     [this](const lmp::Args& a, lmp::CmdContext& ctx) -> Status {
                       return history(a, ctx);
-                    });
+                    },
+                    lmp::kCmdReadOnly);
     c.commands->add("events", LMP_HELP("What happened in the network, the latest first"), kFromArgs,
                     [this](const lmp::Args& a, lmp::CmdContext& ctx) -> Status {
                       return events(a.u16("from"), ctx);
-                    });
+                    },
+                    lmp::kCmdReadOnly);
     c.commands->add("pc.add", LMP_HELP("A PC to switch on with Wake-on-LAN"), kPcAddArgs,
                     [this](const lmp::Args& a, lmp::CmdContext& ctx) -> Status {
                       return pcAdd(a, ctx);
@@ -846,26 +848,29 @@ class ExpNet final : public lmp::sdk::Module {
                     [this](const lmp::Args& a, lmp::CmdContext&) -> Status {
                       Pc* p = pcOf(a.u8("id"));
                       return p ? wake(*p) : Status::NotFound;
-                    });
+                    },
+                    lmp::kCmdSensitive);
     c.commands->add("pc.off", LMP_HELP("Turns a PC off with its webhook"), kIdArgs,
                     [this](const lmp::Args& a, lmp::CmdContext& ctx) -> Status {
                       Pc* p = pcOf(a.u8("id"));
                       return p ? turnOff(*p, ctx.ref) : Status::NotFound;
                     },
-                    lmp::kCmdAsync | lmp::kCmdConfirm);
+                    lmp::kCmdAsync | lmp::kCmdConfirm | lmp::kCmdSensitive);
     c.commands->add("scan", LMP_HELP("Who is in the network: addresses, MAC, names, services"),
                     [this](const lmp::Args&, lmp::CmdContext& ctx) -> Status {
                       return startScan(ctx.ref, false);
                     },
-                    lmp::kCmdAsync);
+                    lmp::kCmdAsync | lmp::kCmdSensitive);
     c.commands->add("hosts", LMP_HELP("The devices of the network, a page at a time"), kFromArgs,
                     [this](const lmp::Args& a, lmp::CmdContext& ctx) -> Status {
                       return hostsPage(a.u16("from"), ctx);
-                    });
+                    },
+                    lmp::kCmdReadOnly);
     c.commands->add("makers", LMP_HELP("The extended table of the makers, a page at a time"), kFromArgs,
                     [](const lmp::Args& a, lmp::CmdContext& ctx) -> Status {
                       return makersPage(a.u16("from"), ctx);
-                    });
+                    },
+                    lmp::kCmdReadOnly | lmp::kCmdUi);
     c.commands->add("host.alias", LMP_HELP("Gives a device of the network a name or a type of yours"),
                     kAliasArgs,
                     [this](const lmp::Args& a, lmp::CmdContext& ctx) -> Status {
@@ -874,7 +879,8 @@ class ExpNet final : public lmp::sdk::Module {
     c.commands->add("live", LMP_HELP("The time of the answers of the router and of Internet, the signal"),
                     [this](const lmp::Args&, lmp::CmdContext& ctx) -> Status {
                       return live(ctx);
-                    });
+                    },
+                    lmp::kCmdReadOnly | lmp::kCmdUi);
     c.commands->add("notify.test", LMP_HELP("Sends a message to Telegram, to try it"),
                     [this](const lmp::Args&, lmp::CmdContext& ctx) -> Status {
                       if (!telegramReady()) return Status::Denied;

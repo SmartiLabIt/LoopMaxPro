@@ -299,6 +299,14 @@ A device presents itself to Home Assistant through its broker, with MQTT discove
 Assistant needs its MQTT integration and nothing else: no add-on for LoopMaxPro, no line in its
 configuration.
 
+<p align="center">
+<img src="assets/img/things.svg" alt="LoopMaxPro things: a module tells its things once (switches, lights, numbers, yes or no, texts, choices, buttons); the system describes them, follows their values, checks what is set and keeps the measures with their time; Home Assistant, a server of yours and the console use them without knowing the module" width="900">
+</p>
+
+A module tells what it has, once, as a list of **things**. The same list is what Home
+Assistant shows, what a server reads through a bridge, and what the console and the HTTP API
+give to who asks: none of them knows the module.
+
 ### Setting it up
 
 1. In Home Assistant, add the MQTT integration with its broker (Mosquitto).
@@ -330,8 +338,12 @@ One device for each LoopMaxPro device, and one entity for each thing its modules
 | `toggle` | `switch` | With its device class: `outlet` for a socket |
 | `light` | `light` | On and off, brightness, colour when the light has colours |
 | `number` | `sensor` | Unit and device class; with a unit, a measurement with its decimals |
+| `number` that can be set | `number` | With its limits and its step |
 | `flag` | `binary_sensor` | With its device class: `problem`, `motion`, `connectivity`... |
 | `text` | `sensor` | A word |
+| `text` that can be set | `text` | With the length it takes |
+| `select` | `sensor` of class `enum` | A state, with the values it can have |
+| `select` that can be set | `select` | The values are told by their ids, not by their names |
 | `button` | `button` | Does one thing, has no state |
 
 The names are in the language of the device. Every entity follows `<base>/status`: when the
@@ -341,11 +353,47 @@ What the free modules present:
 
 | Module | In Home Assistant |
 |--------|-------------------|
-| [Zappy 2](../src/modules/zappy2/README.md) | Two sockets, `ch0` and `ch1`: switches of class `outlet`, with the names given to the channels |
-| [RGB Controller](../src/modules/rgb/README.md) | One light, `light0`: on and off, brightness, colour |
-| [GanjaLeaf](../src/modules/ganjaleaf/README.md) | Two lights, `light0` and `light1`: the leaf and the ring |
-| [MeteoWifi](../src/modules/meteowifi/README.md) | Sensors `temperature`, `feels`, `humidity`, `wind`; the button `refresh` |
+| [Zappy 2](../src/modules/zappy2/README.md) | Two sockets, `ch0` and `ch1`: switches of class `outlet`, with the names given to the channels; the button `flip`, which inverts them |
+| [RGB Controller](../src/modules/rgb/README.md) | One light, `light0`: on and off, brightness, colour. Its effect to choose, `effect0`, and the speed of the effect, `speed0` |
+| [GanjaLeaf](../src/modules/ganjaleaf/README.md) | Two lights, `light0` and `light1`: the leaf and the ring, each with its effect and its speed |
+| [MeteoWifi](../src/modules/meteowifi/README.md) | Sensors `temperature`, `feels`, `humidity`, `wind`; the button `refresh`; the city to write, `place`, and the degrees to choose, `units` |
 | [ExpNet](../src/modules/expnet/README.md) | For each service watched, whether it answers and how long it takes; for each PC, whether it is on and a button that wakes it; how many devices are in the network |
+| [EspRadio](../src/modules/espradio/README.md) | One sensor, `favs`: how many favourite stations the device keeps. The sound is of the browser |
+
+### What you can do with it
+
+Everything below needs nothing but the broker: no cloud, no account, no code on the device.
+
+| With | You can |
+|------|---------|
+| **Dashboards** | Put a device next to the rest of the house: its sockets as switches, its lights with brightness and colour, its sensors with their unit and their history, its buttons |
+| **What can be set** | Change from Home Assistant what until now was changed only in the console of the device: the effect of a light from a list, the speed of the effect with a slider, the city of the weather by writing it, Celsius or Fahrenheit |
+| **Automations** | Use a device as a cause and as an effect. *When the sun sets, the strip goes to the rainbow effect at speed 30. When a service of the network stops answering, a light turns red. Every morning the button of the weather is pressed and the temperature is read aloud* |
+| **Scripts and scenes** | Group several things in one gesture: a scene "evening" that turns two sockets on, sets the leaf to a fixed colour and the ring to the comet effect |
+| **Voice assistants** | Through Home Assistant: its own Assist, and Alexa, Google Home and Siri when Home Assistant is linked to them |
+| **Other devices of the house** | Anything Home Assistant knows can command a LoopMaxPro device and be commanded by it, whoever made it |
+
+What is set from Home Assistant is checked by the device before the module sees it: a number
+out of its limits, a text too long and a value that is not among those of a choice are refused,
+and the entity goes back to what the thing is. A channel held by a schedule is not turned from
+Home Assistant either: the schedule wins, as in the console.
+
+**What the voice assistants understand**, when they go through Home Assistant. It depends on
+Home Assistant and on each assistant, not on the device:
+
+| A thing | Entity | Assist | Alexa | Google Home | Siri (HomeKit) |
+|---------|--------|--------|-------|-------------|----------------|
+| A socket, a light | `switch`, `light` | yes | yes | yes | yes |
+| A temperature, a humidity | `sensor` | yes | the temperature | yes | yes |
+| A motion, a contact | `binary_sensor` | yes | yes | no | yes |
+| A button | `button` | yes | as a scene | as a scene | as a switch |
+| A number that can be set | `number` | yes | yes, with its limits and its step | no | no |
+| A choice that can be set | `select` | yes | no | yes, as a mode | yes, one switch for each value |
+| A text that can be set | `text` | yes | no | no | no |
+
+Home Assistant exposes to the assistants by itself only some of its entities, the switches and
+the lights among them; the others are exposed by hand, in its settings of the voice assistants.
+The things a module marks as technical are never offered to them.
 
 ### Topics of the bridge
 
@@ -358,7 +406,7 @@ separators: `lmp_aabbccdd9f3a`.
 | `<base>/home/<module>/state` | out, retained | The values of the things of the module, in one JSON: `{"ch0":"ON","ch1":"OFF"}` |
 | `<base>/home/<module>/<part>/state` | out, retained | The same, for a part of the module that is a device of its own |
 | `<base>/home/<module>/light/<thing>` | out, retained | A light, as Home Assistant reads it: state, brightness, colour |
-| `<base>/home/<module>/set/<thing>` | in | `ON`, `OFF`, `PRESS`, or the JSON of a light. For a part: `set/<part>.<thing>` |
+| `<base>/home/<module>/set/<thing>` | in | `ON`, `OFF`, `PRESS`, the JSON of a light, or the number, the text or the value to set. For a part: `set/<part>.<thing>` |
 
 The discovery message of the first socket of a Zappy 2, on
 `homeassistant/switch/lmp_aabbccdd9f3a/zappy2_ch0/config`:
@@ -433,6 +481,10 @@ lmp::Status thingSet(const char* id, const lmp::sdk::ThingAsk& ask) override {
 | `flag(id, name, on, kind)` | Yes or no, to read. `kind`: `problem`, `motion`, `occupancy`, `connectivity`... |
 | `text(id, name, value)` | A word to read |
 | `button(id, name)` | Something to press |
+| `choice(id, name, value, options)` | One among fixed values: a mode, an effect |
+| `settable(min, max, step)` | The next number, text or choice, and only that one, can be set from Home Assistant. What it does not take (a number out of its limits, a value that is not among those of the choice) is refused before the module sees it |
+| `range(min, max)` | The limits of the next number. They are for who reads the things as data: Home Assistant has no use for them on a sensor |
+| `measured(unixSeconds)` | When the next number was measured. For who reads the things as data too: Home Assistant gives its own time to what it receives |
 | `technical()` | The next thing, and only that one, is for who looks after the device: a broken sensor, a battery. Home Assistant keeps it among the diagnostic entities |
 | `part(id, name)` | The things that follow belong to a part of the module that is a device of its own, reached through this one. A null id goes back to the device itself |
 
@@ -440,21 +492,34 @@ lmp::Status thingSet(const char* id, const lmp::sdk::ThingAsk& ask) override {
   language of the device.
 - An id never changes: it is how Home Assistant remembers a thing. Use lower case letters,
   digits and `_`: it becomes part of the topics and of the template that reads the value.
-- `ThingAsk` carries only what was asked: `on`, `brightness` (1 to 100), a colour, `press`.
+- `ThingAsk` carries only what was asked: `on`, `brightness` (1 to 100), a colour, `press`; for
+  a thing that can be set, `number`, or `text`.
 - When a value changes, `markChanged()` is enough, as for the console.
 - The parts of the SDK tell theirs by themselves. A `PinBank` tells its channels (`ch0`,
   `ch1`), as switches, or as contacts to read for a bank of inputs; `kind("outlet")` makes them
-  sockets. `Lights` tells its lights (`light0`). A module made only of those writes nothing:
-  see [Zappy 2](../src/modules/zappy2/src/zappy2.cpp).
+  sockets, and with more than one channel there is the button `flip`. `Lights` tells its lights
+  (`light0`), each with its effect and the speed of the effect. A module made only of those
+  writes nothing: see [Zappy 2](../src/modules/zappy2/src/zappy2.cpp).
 
-The same things are also data of the module, in the builds with MQTT
-([src/sdk/things.h](../src/sdk/things.h)): its document has the object `things` with their
+### The same things, as data
+
+Home Assistant is one reader of the things. Any program can be another: the things are also
+data of the module, in the builds with MQTT or with a [cloud bridge](cloud.md)
+([src/sdk/things.h](../src/sdk/things.h)). Its document has the object `things` with their
 values, and its target has the commands `things`, which describes them, and `thing.set`:
 
 ```
 cmd mod.zappy2 things
 cmd mod.zappy2 thing.set thing=ch0 value=ON
+cmd mod.rgb thing.set thing=effect0 value=rainbow
+cmd mod.rgb thing.set thing=speed0 number=80
 ```
+
+A program that reads a device this way gets more than Home Assistant asks for: the limits of
+each number (`min`, `max`), what can be set and how (`writable`, `step`, `options`), when each
+measure was made (`at`), and, on a device with a server, the measures made while the server was
+away (`things.kept`). It is what a server needs to show and command a device it has never seen:
+[Cloud](cloud.md#the-things-of-the-modules-for-a-server).
 
 More on modules in [Modules and SDK](modules-sdk.md) and [Writing a module](writing-a-module.md).
 

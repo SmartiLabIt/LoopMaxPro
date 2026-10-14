@@ -115,9 +115,14 @@ void PinBankBase::things(ThingSink& sink) const {
       sink.flag(id, entries_[i].name.c_str(), entries_[i].on, kind_);
     }
   }
+  // The command "flip", for who presses a button instead of writing a command.
+  if (output_ && count_ > 1) sink.button("flip", {"Invert", "Inverti"});
 }
 
 Status PinBankBase::thingSet(const char* id, const ThingAsk& ask) {
+  if (declared_ && !virtual_ && output_ && count_ > 1 && strcmp(id, "flip") == 0) {
+    return ask.press ? flipAll() : Status::Invalid;
+  }
   if (!declared_ || virtual_ || id[0] != 'c' || id[1] != 'h' || id[2] < '0' || id[2] > '9') {
     return Status::NotFound;
   }
