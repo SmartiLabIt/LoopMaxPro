@@ -133,3 +133,9 @@ the same terms, saying where it comes from. **Commercial use is forbidden, in an
 variant**, without a written license from SmartiLab. Read the [LICENSE](LICENSE).
 
 The code of others keeps its own license: see [THIRD-PARTY.md](THIRD-PARTY.md).
+
+<h2 id="credits"><img src="docs/assets/h/credits.svg" alt="Credits" height="24"></h2>
+
+Parts of LoopMaxPro, and above all its unit tests, were written with the help of
+[Claude Code](https://claude.com/claude-code), the coding assistant of Anthropic, with the model
+Claude Opus 5.5.
