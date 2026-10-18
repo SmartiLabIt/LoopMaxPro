@@ -4,6 +4,14 @@ What each version fixes and adds. The newest on top. Written in English: the not
 shown as they are, in the console and on the server.
 The versions of the modules have their notes in the folder of each module.
 
+## 1.0.15 (2026-10-18)
+
+- A module can read the signal of the Wi-Fi the device is on, and the local time of any moment, its daylight saving included: what a screen needs to show the signal and the hour of the last event
+- The commands say which ones are of every day, simple and safe, for who commands the device without the rights of the advanced. Those that need no value to choose are buttons among the things too: the channels have All on and All off besides Invert
+- A button that undoes what does not come back says so, as its command does, and Home Assistant never gets it
+- The settings tell their unit, whether they are for who looks after the device, and the values of a choice; the numbers of the things tell their limits where they are known
+- The names of the commands, arguments and settings of every module, in English and Italian, travel with the console to a server. A phrase a page shares with another module, or one the console has already, is kept once
+
 ## 1.0.14 (2026-10-14)
 
 What a device shows to Home Assistant and to a server says more, and some of it can be set from there.

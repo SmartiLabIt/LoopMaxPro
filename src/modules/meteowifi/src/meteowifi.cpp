@@ -63,12 +63,12 @@ struct Cfg {
 }  // namespace meteowifi
 
 LMP_FIELDS(meteowifi::Cfg,
-  LMP_F(api,        "api",        Str(0, 96, "http://api.open-meteo.com/v1/forecast")),
-  LMP_F(geoApi,     "geoApi",     Str(0, 96, "http://geocoding-api.open-meteo.com/v1/search")),
+  LMP_F(api,        "api",        Str(0, 96, "http://api.open-meteo.com/v1/forecast").technical()),
+  LMP_F(geoApi,     "geoApi",     Str(0, 96, "http://geocoding-api.open-meteo.com/v1/search").technical()),
   LMP_F(place,      "place",      Str(0, 48, "")),
-  LMP_F(lat,        "lat",        F32(-90, 90, 0)),
-  LMP_F(lon,        "lon",        F32(-180, 180, 0)),
-  LMP_F(everyMin,   "everyMin",   U16(5, 1440, 15)),
+  LMP_F(lat,        "lat",        F32(-90, 90, 0).unit("\xC2\xB0").technical()),
+  LMP_F(lon,        "lon",        F32(-180, 180, 0).unit("\xC2\xB0").technical()),
+  LMP_F(everyMin,   "everyMin",   U16(5, 1440, 15).unit("min")),
   LMP_F(fahrenheit, "fahrenheit", Bool(false)),
   // On from the factory where the build gives the pins of a screen (NodeMCU, Kit 8); off on
   // the boards without one, where a switch that is on would promise what is not there.
@@ -336,7 +336,7 @@ class Settings final : public lmp::sdk::ModuleConfig<Cfg> {
 };
 
 class MeteoWifi final : public lmp::sdk::Module {
-  LMP_MODULE("meteowifi", "MeteoWifi", "\xF0\x9F\x8C\xA4", "1.0.5",
+  LMP_MODULE("meteowifi", "MeteoWifi", "\xF0\x9F\x8C\xA4", "1.0.6",
              lmp::sdk::ModuleKind::Online, 1000)
 
  public:
@@ -382,7 +382,7 @@ class MeteoWifi final : public lmp::sdk::Module {
                     [this](const lmp::Args&, lmp::CmdContext&) -> Status {
                       forced_ = true;
                       return Status::Ok;
-                    });
+                    }, lmp::kCmdEveryday);
     return Status::Ok;
   }
 
@@ -433,12 +433,17 @@ class MeteoWifi final : public lmp::sdk::Module {
   // who reads the document with a program.
   // What a home system reads of the weather (sdk/home.h): the values of the console.
   void things(lmp::sdk::ThingSink& out) const override {
-    const char* deg = settings_->fahrenheit ? "\xC2\xB0" "F" : "\xC2\xB0" "C";
+    const bool f = settings_->fahrenheit;
+    const char* deg = f ? "\xC2\xB0" "F" : "\xC2\xB0" "C";
     // The four numbers arrive together, with the weather: that is when they were measured.
+    // Their limits are the ones of the weather of the Earth (F30 d of the server: a number
+    // without limits stays out of Google): -90 to 60 degrees, felt -100 to 70, wind to 410 km/h.
     out.measured(gotAt_);
+    out.range(f ? -130 : -90, f ? 140 : 60);
     out.number("temperature", {"Temperature", "Temperatura"}, now_.temp, deg,
                "temperature", 1, have_);
     out.measured(gotAt_);
+    out.range(f ? -148 : -100, f ? 158 : 70);
     out.number("feels", {"Feels like", "Percepita"}, now_.feels, deg, "temperature", 1,
                have_);
     out.measured(gotAt_);
@@ -446,6 +451,7 @@ class MeteoWifi final : public lmp::sdk::Module {
     out.number("humidity", {"Humidity", "Umidit\xC3\xA0"}, now_.humidity, "%", "humidity", 0,
                have_);
     out.measured(gotAt_);
+    out.range(0, 410);
     out.number("wind", {"Wind", "Vento"}, now_.wind, "km/h", "wind_speed", 1, have_);
     out.button("refresh", {"Refresh the weather", "Aggiorna il meteo"});
     // The city and the degrees can be set from outside too, as with the commands. Empty: the

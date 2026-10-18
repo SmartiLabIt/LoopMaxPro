@@ -2,10 +2,11 @@
   "name": "espradio",
   "kind": "online",
   "title": "EspRadio",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "icon": "📻",
   "uiApi": 1,
   "ui": "ui/espradio.js",
+  "uiShared": ["src/modules/espradio/ui/shared.js"],
   "params": {},
   "requires": [
     "config"

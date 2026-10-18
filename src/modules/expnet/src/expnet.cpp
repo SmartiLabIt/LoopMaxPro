@@ -67,26 +67,29 @@ struct Cfg {
   uint32_t snmpIf;                      // the port of that router towards Internet; 0: found
 };
 
+// The values of trafficFrom, for who shows the setting as a choice (F30 c of the server).
+constexpr const char* kTrafficFrom[] = {"0", "1", "2", "3", "4"};
+
 }  // namespace expnet
 
 LMP_FIELDS(expnet::Cfg,
   LMP_F(telegramToken, "telegramToken", Str(0, 64, "").secret()),
-  LMP_F(telegramChat,  "telegramChat",  Str(0, 24, "")),
+  LMP_F(telegramChat,  "telegramChat",  Str(0, 24, "").technical()),
   LMP_F(botCommands,   "botCommands",   Bool(false).locked()),
   LMP_F(notify,        "notify",        Bool(true)),
   LMP_F(notifyNew,     "notifyNew",     Bool(true)),
   LMP_F(notifyPc,      "notifyPc",      Bool(false)),
   LMP_F(notifyNet,     "notifyNet",     Bool(true)),
-  LMP_F(summaryHour,   "summaryHour",   U8(0, 24, 24)),
-  LMP_F(quietFrom,     "quietFrom",     U8(0, 24, 24)),
-  LMP_F(quietTo,       "quietTo",       U8(0, 23, 7)),
-  LMP_F(scanEveryMin,  "scanEveryMin",  U16(0, 1440, 15)),
-  LMP_F(everySec,      "everySec",      U16(10, 3600, 60)),
-  LMP_F(trafficFrom,   "trafficFrom",   U8(0, 4, 0)),
-  LMP_F(upnpHost,      "upnpHost",      Str(0, 21, "")),
+  LMP_F(summaryHour,   "summaryHour",   U8(0, 24, 24).unit("h")),
+  LMP_F(quietFrom,     "quietFrom",     U8(0, 24, 24).unit("h")),
+  LMP_F(quietTo,       "quietTo",       U8(0, 23, 7).unit("h")),
+  LMP_F(scanEveryMin,  "scanEveryMin",  U16(0, 1440, 15).unit("min")),
+  LMP_F(everySec,      "everySec",      U16(10, 3600, 60).unit("s")),
+  LMP_F(trafficFrom,   "trafficFrom",   U8(0, 4, 0).choices(expnet::kTrafficFrom).technical()),
+  LMP_F(upnpHost,      "upnpHost",      Str(0, 21, "").technical()),
   // Not a secret: it must be seen, and emptied again, which the form does not do with one.
-  LMP_F(snmpCommunity, "snmpCommunity", Str(0, 24, "")),
-  LMP_F(snmpIf,        "snmpIf",        U32(0, 4294967295.0, 0)))
+  LMP_F(snmpCommunity, "snmpCommunity", Str(0, 24, "").technical()),
+  LMP_F(snmpIf,        "snmpIf",        U32(0, 4294967295.0, 0).technical()))
 
 namespace expnet {
 namespace {
@@ -481,7 +484,7 @@ class Settings final : public lmp::sdk::ModuleConfig<Cfg> {
 };
 
 class ExpNet final : public lmp::sdk::Module {
-  LMP_MODULE("expnet", "ExpNet", "\xF0\x9F\xA7\xB0", "1.0.5", lmp::sdk::ModuleKind::Online, kTickMs)
+  LMP_MODULE("expnet", "ExpNet", "\xF0\x9F\xA7\xB0", "1.0.6", lmp::sdk::ModuleKind::Online, kTickMs)
 
  public:
   Status onInit(lmp::sdk::ModuleContext& c) override {
@@ -697,6 +700,8 @@ class ExpNet final : public lmp::sdk::Module {
       snprintf(name, sizeof(name), it ? "Accendi %s" : "Wake %s", p.name);
       out.button(id, name);
     }
+    // At most the devices the list of this board holds (F30 d of the server).
+    out.range(0, kHostsMax);
     out.number("net", it ? "Dispositivi in rete" : "Devices in the network", onlineCount_, "", "",
                0, lastScanUnix_ != 0);
   }
@@ -815,7 +820,7 @@ class ExpNet final : public lmp::sdk::Module {
                       if (!s) return Status::NotFound;
                       s->nextMs = nowMs_;
                       return Status::Ok;
-                    });
+                    }, lmp::kCmdEveryday);
     c.commands->add("history", LMP_HELP("The last day of a service, or its week"), kHistoryArgs,
                     [this](const lmp::Args& a, lmp::CmdContext& ctx) -> Status {
                       return history(a, ctx);
@@ -890,7 +895,7 @@ class ExpNet final : public lmp::sdk::Module {
                                  ? (ctx.ref ? Status::Pending : Status::Ok)
                                  : Status::Busy;
                     },
-                    lmp::kCmdAsync);
+                    lmp::kCmdAsync | lmp::kCmdSensitive);
   }
 
   // Ping and tcp want an address; http takes a name too, which its client resolves.

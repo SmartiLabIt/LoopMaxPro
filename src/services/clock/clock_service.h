@@ -17,6 +17,9 @@ class IClockService {
   virtual bool synced() const = 0;
   virtual int64_t unixTime() const = 0;           // 0 when the time is not known
   virtual bool localTime(hal::DateTime& out) const = 0;
+  // A moment of the past or of the future, in the time zone of the device, with its own
+  // daylight saving. False while the time is not known.
+  virtual bool localTimeOf(int64_t unixSeconds, hal::DateTime& out) const = 0;
   virtual Status setTime(int64_t unixSeconds, TimeSource source) = 0;
   // tz is the name shown to the user, posix is what the C library needs.
   virtual Status setTimezone(const char* tz, const char* posix) = 0;
@@ -37,6 +40,7 @@ class ClockService : public Service, public IClockService {
   bool synced() const override { return source_ != TimeSource::None; }
   int64_t unixTime() const override;
   bool localTime(hal::DateTime& out) const override;
+  bool localTimeOf(int64_t unixSeconds, hal::DateTime& out) const override;
   Status setTime(int64_t unixSeconds, TimeSource source) override;
   Status setTimezone(const char* tz, const char* posix) override;
 

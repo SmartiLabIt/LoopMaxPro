@@ -32,12 +32,12 @@ struct LeafCfg {
 }  // namespace
 
 LMP_FIELDS(LeafCfg,
-  LMP_F(pwmHz, "pwmHz", U16(100, 20000, 5000)))
+  LMP_F(pwmHz, "pwmHz", U16(100, 20000, 5000).unit("Hz").technical()))
 
 namespace {
 
 class GanjaLeaf final : public lmp::sdk::Module {
-  LMP_MODULE("ganjaleaf", "GanjaLeaf", "\xF0\x9F\x8C\xBF", "1.0.1", lmp::sdk::ModuleKind::Hardware, 20)
+  LMP_MODULE("ganjaleaf", "GanjaLeaf", "\xF0\x9F\x8C\xBF", "1.0.2", lmp::sdk::ModuleKind::Hardware, 20)
 
  public:
   lmp::Status onInit(lmp::sdk::ModuleContext& c) override {

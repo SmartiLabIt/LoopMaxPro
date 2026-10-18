@@ -89,6 +89,10 @@ bool ClockService::localTime(hal::DateTime& out) const {
   return now > 0 && clock_->localTime(now, out);
 }
 
+bool ClockService::localTimeOf(int64_t unixSeconds, hal::DateTime& out) const {
+  return synced() && unixSeconds > 0 && clock_->localTime(unixSeconds, out);
+}
+
 void ClockService::accept(TimeSource source, int64_t unixSeconds) {
   source_ = source;
   syncedAt_ = unixSeconds;

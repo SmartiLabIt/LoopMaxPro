@@ -45,7 +45,11 @@ enum CmdFlags : uint8_t {
   kCmdSensitive = 16,  // acts outside the device, or undoes what does not come back: turns a
                        // PC off, calls an address from inside the network, clears a count
   kCmdSecret = 32,     // its answer carries something to keep: never shown, never written down
-  kCmdUi = 64          // serves the page of the module: of no use to who does not draw it
+  kCmdUi = 64,         // serves the page of the module: of no use to who does not draw it
+  // Of every day: simple and safe, it can be given to who commands the device (a home system,
+  // a voice assistant) without the rights of the advanced. Never sensitive, secret, of the page
+  // or asking for confirmation. A command without it is advanced: renaming, schedules, pairing.
+  kCmdEveryday = 128
 };
 
 struct ArgSpec {

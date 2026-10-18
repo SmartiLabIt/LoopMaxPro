@@ -3,6 +3,11 @@
 What each version fixes and adds. The newest on top. Written in English: the notes are
 shown as they are, in the console and on the server.
 
+## 1.0.5 (2026-10-18)
+
+- The names of its commands and settings, in English and Italian, travel with the console to a server; the phrases it has in common with its full version are kept once, with the same keys
+- The settings tell their unit, and which ones are technical
+
 ## 1.0.4 (2026-10-14)
 
 - The device tells how many favourite stations it keeps, to Home Assistant and to who reads it as data

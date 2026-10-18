@@ -23,10 +23,37 @@ export function getLang() {
   return currentLang;
 }
 
+// The same keys for the same phrases (F31 of the server): a module whose phrases are in a file
+// in common with another module says its prefix ('mod.expnet' -> 'share.net'), and a phrase that
+// is one of the console says its key ('mod.espradio.search' -> 'net.scan'). The module keeps
+// asking with its own keys; the phrase is kept once.
+const SHARED = {};    // 'mod.expnet' -> ['share.net']
+const SAME = {};      // 'mod.espradio.search' -> 'net.scan'
+
+export function addShared(scope, prefixes, same) {
+  if (prefixes && prefixes.length) SHARED[scope] = (SHARED[scope] || []).concat(prefixes);
+  Object.keys(same || {}).forEach((key) => { SAME[key] = same[key]; });
+}
+
+function lookup(dict, key) {
+  if (dict[key] !== undefined) return dict[key];
+  const to = SAME[key];
+  if (to !== undefined && dict[to] !== undefined) return dict[to];
+  if (key.startsWith('mod.')) {
+    const dot = key.indexOf('.', 4);
+    const prefixes = dot > 0 ? SHARED[key.slice(0, dot)] : undefined;
+    for (const p of prefixes || []) {
+      const text = dict[p + key.slice(dot)];
+      if (text !== undefined) return text;
+    }
+  }
+  return undefined;
+}
+
 export function t(key, vars) {
   const dict = DICTS[currentLang] || DICT_EN;
-  let text = dict[key];
-  if (text === undefined) text = DICT_EN[key];
+  let text = lookup(dict, key);
+  if (text === undefined) text = lookup(DICT_EN, key);
   if (text === undefined) return key;
   if (vars) text = text.replace(/\{(\w+)\}/g, (m, k) => (vars[k] === undefined ? m : vars[k]));
   return text;
@@ -48,5 +75,6 @@ export function addTexts(byLang) {
 // A text that may be missing: undefined instead of the key.
 export function tMaybe(key) {
   const dict = DICTS[currentLang] || DICT_EN;
-  return dict[key] !== undefined ? dict[key] : DICT_EN[key];
+  const text = lookup(dict, key);
+  return text !== undefined ? text : lookup(DICT_EN, key);
 }

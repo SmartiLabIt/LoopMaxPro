@@ -322,6 +322,13 @@ member: a mismatch stops the build.
 | `.secret()` | Accepted in input, never written in a document: the document says `"<key>Set": true` or `false`. The value lives in the file |
 | `.readOnly()` | Written in output, ignored in input |
 | `.locked()` | Shown with its default and never taken, neither from a command nor from the file. The schema marks it `locked` |
+| `.unit("cm")` | The unit of the value, for who shows the setting without the page: `cm`, `%`, `min`, `ms`, `s`, `h`, `Hz`. The schema says `unit` |
+| `.technical()` | A setting for who looks after the device, not for every day: kept apart. The schema says `technical` |
+| `.choices(kList)` | The values the setting takes, as they are written (`constexpr const char* kList[] = {"0", "1"}`): who shows it offers a choice. The schema says `choices` |
+
+The names of the settings, in the languages, are not in the firmware: they are the texts of the
+page of the module (`mod.<module>.<key>`), or of the console (`field.<key>`), and the package of
+the console gives them to who shows the device without its page.
 
 ### State and settings
 
@@ -380,6 +387,12 @@ c.commands->add("pulse", LMP_HELP("Turns a channel on for the time of the settin
   network, clears a count); `kCmdSecret`, its answer carries something to keep; `kCmdUi`, it
   serves the page of the module only. A command that says none of them is taken as one that
   changes something: say `kCmdReadOnly` for every command that only reads.
+- `kCmdEveryday`: a command **of every day**, simple and safe, that can be given to who commands
+  the device (a home system, a voice assistant) without the rights of the advanced: turning a
+  channel on, a colour, a measure now. Never with `kCmdSensitive`, `kCmdSecret`, `kCmdUi` or
+  `kCmdConfirm`. Renaming, schedules and pairing are advanced: they say nothing. A command of
+  every day that needs no value to choose is a button among the things too (`all` is two of them,
+  `all_on` and `all_off`).
 - `LMP_HELP("...")` is the help text. The light edition leaves the texts out of the firmware.
 
 The same handler answers every way in:
@@ -481,8 +494,8 @@ a shared bus, a queue of requests; the driver of the component is code of the mo
 | I2C | `ctx().bus->openI2c(bus, sda, scl, hz, owner)`, then `i2c(bus)`, `closeI2c` | The bus is shared: who opens it first chooses pins and speed, who comes later joins it and is refused on other pins |
 | SPI | `bus->openSpi(sck, miso, mosi, owner)`, then `spi()` | Shared the same way. The select pin of a chip belongs to its module |
 | A request to a server | `ctx().http->fetch(what, done)` | One request travels at a time, the others wait. `done` runs on the application task. `secure()` tells whether `https` addresses can be reached |
-| The network | `ctx().net->connected()`, `internet()` | `internet()` is true when the last check found Internet reachable |
-| The time | `ctx().clock->synced()`, `unixTime()`, `localTime(out)` | |
+| The network | `ctx().net->connected()`, `internet()`, `signal()` | `internet()` is true when the last check found Internet reachable; `signal()` is the dBm of the Wi-Fi the device is on, 0 when it is on none |
+| The time | `ctx().clock->synced()`, `unixTime()`, `localTime(out)`, `localTimeOf(unix, out)` | `localTimeOf` gives a moment of the past or of the future in the time zone of the device, with its own daylight saving: the hour of the last event, for a screen |
 | Files | `ctx().storage->readFile`, `writeFile`, `exists`, `remove` | A write goes to a temporary file first: the old content survives a power loss |
 | The broker | `ctx().mqtt->publish(topic, payload)`, `listen(prefix, listener)` | The topic follows the base of the device |
 | The position | `ctx().geo->known()`, `latitude()`, `longitude()`, `set(place, source)` | A module with a GPS writes it with `GeoSource::Gps` |
@@ -537,7 +550,8 @@ lmp::Status thingSet(const char* id, const lmp::sdk::ThingAsk&) override {
 | `button(id, name)` | Is pressed: it does one thing and has no state |
 | `choice(id, name, value, options)` | Is one among fixed values: a mode, an effect. `options` is a table of `ThingOption`, each with the id that travels and the name that is shown; `value` is the id of the one of now |
 | `technical()` | Marks the next thing, and only that one, as something for who looks after the device: a broken sensor, a battery |
-| `range(min, max)` | Says that the next number, and only that one, goes from `min` to `max`: what a gauge shows, where a threshold makes sense |
+| `sensitive()` | Marks the next button, and only that one, as one that undoes what does not come back, as the command of the module with its name: a button with the name of a `kCmdSensitive` command says it too. A home system never gets it |
+| `range(min, max)` | Says that the next number, and only that one, goes from `min` to `max`: what a gauge shows, where a threshold makes sense. Say it whenever the limits are known: a number without them is left out by Google |
 | `settable(min, max, step)` | Says that the next number, text or choice, and only that one, can be set from outside. A number goes from `min` to `max` in steps of `step`; for a text `min` and `max` are its length, 64 at most; a choice needs none of them |
 | `measured(unixSeconds)` | Says when the next number, and only that one, was measured; 0 when the time is not known. For a number the module measures at a moment: a level, a reading that arrives from another device |
 | `part(id, name)` | The things that follow belong to a part of the module that is a device of its own; a null id goes back to the device itself |

@@ -94,6 +94,10 @@ A spec can carry a flag:
 | `.secret()` | accepted in input, never written in output |
 | `.readOnly()` | written in output, ignored in input |
 | `.locked()` | shown with its default, never changed |
+| `.technical()` | for who looks after the device: the schema says `technical` |
+
+And what the value is, for who shows it: `.unit("cm")` (the schema says `unit`) and, for a
+choice, `.choices(kList)` (the schema says `choices`, the values as they are written).
 
 The rules of reading:
 

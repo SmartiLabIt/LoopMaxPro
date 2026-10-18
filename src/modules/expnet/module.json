@@ -2,10 +2,11 @@
   "name": "expnet",
   "kind": "online",
   "title": "ExpNet",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "icon": "🧰",
   "uiApi": 1,
   "ui": "ui/expnet.js",
+  "uiShared": ["src/modules/expnet/ui/shared.js"],
   "params": {},
   "requires": [
     "net",

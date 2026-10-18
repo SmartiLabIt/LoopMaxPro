@@ -27,9 +27,9 @@ struct Cfg {
 }  // namespace espradio
 
 LMP_FIELDS(espradio::Cfg,
-  LMP_F(cats,    "cats",    Str(0, 159, "")),
+  LMP_F(cats,    "cats",    Str(0, 159, "").technical()),
   LMP_F(country, "country", Str(0, 2, "")),
-  LMP_F(scanSec, "scanSec", U8(3, 60, 8)))
+  LMP_F(scanSec, "scanSec", U8(3, 60, 8).unit("s")))
 
 namespace espradio {
 
@@ -178,7 +178,7 @@ class Settings final : public lmp::sdk::ModuleConfig<Cfg> {
 };
 
 class EspRadio final : public lmp::sdk::Module {
-  LMP_MODULE("espradio", "EspRadio", "\xF0\x9F\x93\xBB", "1.0.4", lmp::sdk::ModuleKind::Online, 0)
+  LMP_MODULE("espradio", "EspRadio", "\xF0\x9F\x93\xBB", "1.0.5", lmp::sdk::ModuleKind::Online, 0)
 
  public:
   Status onInit(lmp::sdk::ModuleContext& c) override {

@@ -53,6 +53,7 @@ class HomePass final : public sdk::ThingSink {
   }
 
   void technical() override { technical_ = true; }
+  void sensitive() override { sensitive_ = true; }
 
   // What can be set is for Home Assistant a number, a text or a select of its own. The limits
   // of a number that is only read say nothing to it.
@@ -234,9 +235,12 @@ class HomePass final : public sdk::ThingSink {
     // Asked for this thing only: taken here, whatever happens to its description.
     const bool apart = technical_;
     technical_ = false;
+    const bool delicate = sensitive_;
+    sensitive_ = false;
     const bool sets = settable_;
     settable_ = false;
     sig_ = mix(mix(mix(mix(mix(mix(sig_, component), id), name), unit), kind), apart ? "t" : "");
+    if (delicate) sig_ = mix(sig_, "d");
     for (uint8_t i = 0; i < optionCount_; ++i) sig_ = mix(sig_, options_[i].id);
     if (sets) {
       // Other limits are another description, as another name is.
@@ -254,6 +258,18 @@ class HomePass final : public sdk::ThingSink {
     snprintf(topic, sizeof(topic), "%s/%s/%s/%s_%s%s%s/config",
              bridge_.kernel_->config().mqtt.homePrefix.c_str(), component, node, manifest_.name,
              part_, part_[0] ? "_" : "", id);
+    if (delicate) {
+      // Never for a home system (F30 of the server): an empty description takes away the one a
+      // firmware before this one may have told, which Home Assistant keeps.
+      if (bridge_.mqtt_->publishAt(topic, StringView(""), true) != Status::Ok) {
+        --at_;
+        stopped_ = true;
+        return;
+      }
+      ++bridge_.sent_;
+      --left_;
+      return;
+    }
     char text[kTopicMax];
 
     BufferSink sink(bridge_.config_, kConfigMax);
@@ -356,6 +372,7 @@ class HomePass final : public sdk::ThingSink {
 
   HomeBridge& bridge_;
   bool technical_ = false;
+  bool sensitive_ = false;
   bool settable_ = false;
   double min_ = 0, max_ = 0, step_ = 0;
   const sdk::ThingOption* options_ = nullptr;

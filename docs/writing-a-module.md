@@ -701,8 +701,15 @@ Before calling a module done:
 - [ ] The file of the module stays under 2 KB at tier MIN and 4 KB elsewhere.
 - [ ] The module tells its things, and their ids are final.
 - [ ] Every command that only reads says `kCmdReadOnly`; one that acts outside the device says
-      `kCmdSensitive`.
-- [ ] The page of the module uses only `ctx`, and has its texts in English and in Italian.
+      `kCmdSensitive`; one of every day, simple and safe, says `kCmdEveryday`, and when it needs
+      no value to choose it is a button among the things too.
+- [ ] Every number of the things whose limits are known says them (`range`); every setting with
+      a unit says it (`.unit`), and one for who looks after the device says `.technical()`.
+- [ ] Every command, argument and setting has its name in English and in Italian, in the texts
+      of the page (`mod.<module>.<key>`) or of the console: the package of the console stops
+      without them.
+- [ ] The page of the module uses only `ctx`, and has its texts in English and in Italian. A
+      phrase the console has already is not written again (`same`).
 
 **The OS**
 

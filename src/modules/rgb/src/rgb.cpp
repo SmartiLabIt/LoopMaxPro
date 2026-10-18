@@ -25,12 +25,12 @@ struct RgbCfg {
 }  // namespace
 
 LMP_FIELDS(RgbCfg,
-  LMP_F(pwmHz, "pwmHz", U16(100, 20000, 5000)))
+  LMP_F(pwmHz, "pwmHz", U16(100, 20000, 5000).unit("Hz").technical()))
 
 namespace {
 
 class Rgb final : public lmp::sdk::Module {
-  LMP_MODULE("rgb", "RGB Controller", "\xF0\x9F\x8C\x88", "1.0.1", lmp::sdk::ModuleKind::Hardware, 20)
+  LMP_MODULE("rgb", "RGB Controller", "\xF0\x9F\x8C\x88", "1.0.2", lmp::sdk::ModuleKind::Hardware, 20)
 
  public:
   lmp::Status onInit(lmp::sdk::ModuleContext& c) override {

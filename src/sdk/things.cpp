@@ -101,6 +101,7 @@ class ThingsLook final : public ThingSink {
   }
 
   void technical() override { technical_ = true; }
+  void sensitive() override { sensitive_ = true; }
   void range(double min, double max) override { next_.limits(min, max); }
   void settable(double min, double max, double step) override { next_.set(min, max, step); }
   void measured(int64_t unixSeconds) override { at_ = stamp(unixSeconds); }
@@ -181,8 +182,8 @@ class ThingsLook final : public ThingSink {
     h = mixText(mixText(h, name.en), name.it);
     h = mixText(mixText(h, unit), type);
     desc_ = mixNumber(h, static_cast<uint32_t>(decimals) | (technical_ ? 0x100u : 0u) |
-                             (in_ ? 0x200u : 0u));
-    technical_ = false;
+                             (in_ ? 0x200u : 0u) | (sensitive_ ? 0x400u : 0u));
+    technical_ = sensitive_ = false;
     // Limits, and that it can be set: only a thing that says them changes the number.
     const Next next = next_.take();
     if (next.range || next.settable) {
@@ -214,6 +215,7 @@ class ThingsLook final : public ThingSink {
   uint16_t parts_ = 0;
   bool in_ = false;
   bool technical_ = false;
+  bool sensitive_ = false;
   bool changed_ = false;
   Next next_;
   ThingMeasures* measures_;
@@ -333,6 +335,7 @@ class DescribeSink final : public ThingSink {
     if (in_) ++partNo_;
   }
   void technical() override { technical_ = true; }
+  void sensitive() override { sensitive_ = true; }
   void range(double min, double max) override { next_.limits(min, max); }
   void settable(double min, double max, double step) override { next_.set(min, max, step); }
   void toggle(const char* id, ThingName name, bool, const char* kind) override {
@@ -382,7 +385,8 @@ class DescribeSink final : public ThingSink {
              const char* type, uint8_t decimals, const ThingOption* options = nullptr,
              uint8_t count = 0) {
     const bool apart = technical_;
-    technical_ = false;
+    const bool delicate = sensitive_;
+    technical_ = sensitive_ = false;
     const Next next = next_.take();
     if (ofPart_ ? !(in_ && partNo_ == 1) : in_) return;
     w_.beginObject();
@@ -412,6 +416,7 @@ class DescribeSink final : public ThingSink {
     }
     if (next.settable && is != Is::Other) w_.boolean("writable", true);
     if (apart) w_.boolean("technical", true);
+    if (delicate) w_.boolean("sensitive", true);
     w_.endObject();
   }
 
@@ -419,6 +424,7 @@ class DescribeSink final : public ThingSink {
   bool ofPart_;
   bool in_ = false;
   bool technical_ = false;
+  bool sensitive_ = false;
   uint16_t partNo_ = 0;
   Next next_;
 };

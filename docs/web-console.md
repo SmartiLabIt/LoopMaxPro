@@ -351,10 +351,27 @@ The console translates the names of the firmware it knows, and makes the others 
 |------|---------------|-----------|
 | A field of a module (a setting, a value, an argument) | `mod.<name>.<key>`, then `field.<key>` | the name made readable: `pulseMs` becomes "Pulse Ms" |
 | What a command does | `cmd.<target>.<command>`; for a module also `cmd.<command>` | the help text of the firmware |
+| The short name of a command | `mod.<name>.<command>`, then `do.<command>` for the commands every module or part of the SDK has | |
+| A value of a choice of a setting | `mod.<name>.<key>.<value>`, then `val.<key>.<value>` | |
 | A value that is a word | `val.<value>` | the word as it is |
 
 A module brings its translations in the `texts` of its own file: nothing of the console has to
 be touched.
+
+**The same keys for the same phrases.** A phrase is kept once:
+
+- a phrase of a page that is one of the console is not written again: the page says, beside its
+  `texts`, `same: { 'mod.demo.search': 'net.scan' }`, and the console answers its key with the
+  text of the console;
+- phrases in common between two modules (a free one and its full version) are in one file,
+  `export default { prefix: 'share.<name>', texts: { en: {...}, it: {...} } }`, named in the
+  `module.json` of both (`"uiShared": ["src/modules/<name>/ui/shared.js"]`). The build joins it
+  to the page of each, and the console looks there for a key `mod.<module>.<phrase>` the page
+  does not have, as `share.<name>.<phrase>`.
+
+The code of the pages keeps asking with its own keys. The names of commands, arguments, settings
+and choices of every module travel to a server in the package of the console (`ui.json`,
+`names`): the package stops when one is missing.
 
 ## How the console talks to the device
 

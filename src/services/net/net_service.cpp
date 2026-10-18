@@ -178,6 +178,13 @@ hal::Ip4 NetService::address() const {
   return apUp_ ? kApAddress : hal::Ip4();
 }
 
+int8_t NetService::signal() const {
+  if (!net_ || state_ != NetState::Connected) return 0;
+  hal::StaInfo sta;
+  net_->staInfo(sta);
+  return sta.rssi;
+}
+
 bool NetService::fromAccessPoint(const hal::Ip4& client) const {
   if (!net_ || !apUp_) return false;
   if (client == kApAddress || !sameNet(client, kApAddress, kApMask)) return false;

@@ -37,7 +37,7 @@ import { Badge, Btn, Card, Empty, Field, KV, Meter, Modal, Notice, Segmented, Se
 import { CommandForm, SchemaForm, fieldLabel } from '../kit/form.js';
 import { Icon, addIcons } from '../kit/icons.js';
 import { useStore } from '../kit/store.js';
-import { addTexts, getLang, t } from '../kit/i18n.js';
+import { addShared, addTexts, getLang, t } from '../kit/i18n.js';
 import { act, command, confirmDialog, deviceClock, docOf, loadCfg, loadDoc, store, toast,
          transport } from './live.js';
 import { askPlace, precisePlace } from './place.js';
@@ -78,6 +78,9 @@ function acceptUi(entry) {
     ui = { error: 'api' };
   } else {
     if (def.texts) addTexts(def.texts);
+    // Its phrases in a file in common with another module, and the phrases of the console it
+    // uses with their keys (F31): the build puts the first, the module says the second.
+    addShared('mod.' + name, def.shared, def.same);
     if (def.icons) addIcons(def.icons);
     ui = Object.assign({}, def, { tabs: Array.isArray(def.tabs) ? def.tabs : [] });
   }

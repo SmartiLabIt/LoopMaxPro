@@ -219,10 +219,11 @@ set.add("set", LMP_HELP("Switches one channel"), kSetArgs,
 | `kCmdSensitive` | the command acts outside the device, or undoes what does not come back. The manifest says `sensitive` |
 | `kCmdSecret` | the answer of the command carries something to keep. The manifest says `secret` |
 | `kCmdUi` | the command serves the page of the module only. The manifest says `ui` |
+| `kCmdEveryday` | the command is of every day: simple and safe, for who commands the device without the rights of the advanced. Never with the three above nor with `kCmdConfirm`. The manifest says `everyday` |
 
-The last four change nothing in how the bus runs a command: they tell who offers the commands
+The last five change nothing in how the bus runs a command: they tell who offers the commands
 of a device without knowing its modules what each one is. A command without them is taken as
-one that changes something.
+one that changes something, and is advanced.
 
 ### What the bus does
 

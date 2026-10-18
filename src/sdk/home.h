@@ -85,6 +85,11 @@ class ThingSink {
   // not offer them to a voice assistant.
   virtual void technical() {}
 
+  // The next button, and only that one, undoes what does not come back, as the command of the
+  // module with its name: clearing a count. The console asks before pressing it; a home system
+  // and the voice assistants never get it (F30 of the server).
+  virtual void sensitive() {}
+
   // The next number, and only that one, goes from min to max: what a gauge shows, and where a
   // threshold makes sense.
   virtual void range(double min, double max) {

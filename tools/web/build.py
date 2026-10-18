@@ -178,9 +178,30 @@ def module_uis(names=None, testing=False):
     return found
 
 
-def module_ui_script(name, path):
+def shared_texts(rel):
+    """A file of texts in common between modules (F31 of the server): export default { prefix:
+    'share.net', texts: { en: {...}, it: {...} } }, every key under the prefix. Its object, as
+    the text of a script."""
+    path = os.path.join(ROOT, rel)
+    if not os.path.isfile(path):
+        fail("the texts in common %s are not there" % rel)
+    with io.open(path, encoding="utf-8") as f:
+        src = f.read()
+    m = re.search(r"^export\s+default\s", src, re.M)
+    if not m or re.search(r"^\s*import[\s{*]", src, re.M):
+        fail("%s: one 'export default { prefix, texts }' and nothing imported" % rel)
+    body = re.sub(r"^[ \t]*//.*\n", "", src[m.end():], flags=re.M).strip().rstrip(";")
+    prefix = re.search(r"\bprefix\s*:\s*'([\w.]+)'", body)
+    if not prefix or not prefix.group(1).startswith("share."):
+        fail("%s: the prefix of texts in common is share.<name>" % rel)
+    return body
+
+
+def module_ui_script(name, path, meta=None):
     """The interface of a module as the browser gets it: a script that hands its object to the
-    console through window.LMP_UI. It imports nothing: everything comes from ctx."""
+    console through window.LMP_UI. It imports nothing: everything comes from ctx. The texts in
+    common it names in module.json ("uiShared") are joined to its own, and their prefixes told
+    to the console, which looks there for what the module does not have (F31)."""
     rel = os.path.relpath(path, ROOT).replace(os.sep, "/")
     with io.open(path, encoding="utf-8") as f:
         src = f.read()
@@ -191,9 +212,19 @@ def module_ui_script(name, path):
         fail("%s: one 'export default { uiApi: 1, ... }' and no other export" % rel)
     body = re.sub(r"^export\s+default\s", "const lmpModuleUi = ", src, flags=re.M)
     body = re.sub(r"^[ \t]*//.*\n", "", body, flags=re.M)
-    script = ("/* LoopMaxPro: interface of the module %s */\n(() => {\n'use strict';\n%s\n"
+    join = ""
+    shared = (meta or {}).get("uiShared", [])
+    if shared:
+        join = ("const lmpShared = [%s];\n"
+                "lmpModuleUi.texts = lmpModuleUi.texts || {};\n"
+                "lmpShared.forEach((s) => Object.keys(s.texts).forEach((lang) => {\n"
+                "  lmpModuleUi.texts[lang] = Object.assign({}, s.texts[lang], lmpModuleUi.texts[lang] || {});\n"
+                "}));\n"
+                "lmpModuleUi.shared = (lmpModuleUi.shared || []).concat(lmpShared.map((s) => s.prefix));\n"
+                % ",\n".join(shared_texts(r) for r in shared))
+    script = ("/* LoopMaxPro: interface of the module %s */\n(() => {\n'use strict';\n%s\n%s"
               "(window.LMP_UI = window.LMP_UI || []).push([%s, lmpModuleUi]);\n})();\n"
-              % (name, body.strip(), json.dumps(name))).encode("utf-8")
+              % (name, body.strip(), join, json.dumps(name))).encode("utf-8")
     check_syntax(script, rel)
     return script
 
@@ -259,8 +290,8 @@ def build(uis):
     the names of the two main files."""
     files = {}
     ui_map = {}
-    for name, (path, _meta) in sorted(uis.items()):
-        script = module_ui_script(name, path)
+    for name, (path, meta) in sorted(uis.items()):
+        script = module_ui_script(name, path, meta)
         file_name = "m.%s.%s.js" % (name, fingerprint(script))
         files[file_name] = script
         ui_map[name] = file_name

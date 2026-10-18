@@ -115,13 +115,20 @@ void PinBankBase::things(ThingSink& sink) const {
       sink.flag(id, entries_[i].name.c_str(), entries_[i].on, kind_);
     }
   }
-  // The command "flip", for who presses a button instead of writing a command.
-  if (output_ && count_ > 1) sink.button("flip", {"Invert", "Inverti"});
+  // The commands "all" and "flip", for who presses a button instead of writing a command: the
+  // commands of every day are buttons too, also "all" with its two values (F30 of the server).
+  if (output_ && count_ > 1) {
+    sink.button("all_on", {"All on", "Tutti accesi"});
+    sink.button("all_off", {"All off", "Tutti spenti"});
+    sink.button("flip", {"Invert", "Inverti"});
+  }
 }
 
 Status PinBankBase::thingSet(const char* id, const ThingAsk& ask) {
-  if (declared_ && !virtual_ && output_ && count_ > 1 && strcmp(id, "flip") == 0) {
-    return ask.press ? flipAll() : Status::Invalid;
+  if (declared_ && !virtual_ && output_ && count_ > 1) {
+    if (strcmp(id, "flip") == 0) return ask.press ? flipAll() : Status::Invalid;
+    if (strcmp(id, "all_on") == 0) return ask.press ? setFree(true) : Status::Invalid;
+    if (strcmp(id, "all_off") == 0) return ask.press ? setFree(false) : Status::Invalid;
   }
   if (!declared_ || virtual_ || id[0] != 'c' || id[1] != 'h' || id[2] < '0' || id[2] > '9') {
     return Status::NotFound;
@@ -168,6 +175,16 @@ Status PinBankBase::toggle(uint8_t channel) {
 Status PinBankBase::setAll(bool on) {
   Status result = Status::Ok;
   for (uint8_t i = 0; i < count_; ++i) {
+    const Status s = set(i, on);
+    if (s != Status::Ok) result = s;
+  }
+  return result;
+}
+
+Status PinBankBase::setFree(bool on) {
+  Status result = Status::Ok;
+  for (uint8_t i = 0; i < count_; ++i) {
+    if (held(i)) continue;
     const Status s = set(i, on);
     if (s != Status::Ok) result = s;
   }
@@ -295,7 +312,8 @@ void PinBankBase::commands(CommandSet& set) {
             const Status s = this->set(a.u8("channel"), a.boolean("value"));
             if (s == Status::Invalid) ctx.errorField = "channel";
             return s;
-          });
+          },
+          kCmdEveryday);
   set.add("toggle", LMP_HELP("Turns a channel into the opposite of what it is"), kChannelArgs,
           [this](const Args& a, CmdContext& ctx) -> Status {
             if (held(a.u8("channel"))) {
@@ -305,20 +323,14 @@ void PinBankBase::commands(CommandSet& set) {
             const Status s = toggle(a.u8("channel"));
             if (s == Status::Invalid) ctx.errorField = "channel";
             return s;
-          });
+          },
+          kCmdEveryday);
   set.add("all", LMP_HELP("Turns every channel on or off, except those a schedule holds"),
-          kValueArgs, [this](const Args& a, CmdContext&) -> Status {
-            Status result = Status::Ok;
-            for (uint8_t i = 0; i < size(); ++i) {
-              if (held(i)) continue;
-              const Status s = this->set(i, a.boolean("value"));
-              if (s != Status::Ok) result = s;
-            }
-            return result;
-          });
+          kValueArgs, [this](const Args& a, CmdContext&) -> Status { return setFree(a.boolean("value")); },
+          kCmdEveryday);
   if (count_ > 1) {
     set.add("flip", LMP_HELP("Every channel into the opposite, except those a schedule holds"),
-            [this](const Args&, CmdContext&) -> Status { return flipAll(); });
+            [this](const Args&, CmdContext&) -> Status { return flipAll(); }, kCmdEveryday);
   }
   if (!virtual_) {
     set.add("invert", LMP_HELP("A channel that is on keeps its pin low"), kSetArgs,

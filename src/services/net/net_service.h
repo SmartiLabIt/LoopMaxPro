@@ -62,6 +62,8 @@ class INetService {
   virtual bool fromAccessPoint(const hal::Ip4& client) const = 0;
   // True when the last check found Internet reachable. False also when nobody checked.
   virtual bool internet() const = 0;
+  // The signal of the network the client is on, in dBm; 0 when it is on none.
+  virtual int8_t signal() const = 0;
   // The devices of the system the last search found in this network (sys.net near). Empty
   // where the board does not look for them.
   virtual Span<const hal::NetPeer> peers() const = 0;
@@ -90,6 +92,7 @@ class NetService : public Service, public INetService {
   bool captive() const override { return captiveUp_; }
   bool fromAccessPoint(const hal::Ip4& client) const override;
   bool internet() const override { return internet_; }
+  int8_t signal() const override;
 #if LMP_FEATURE_MDNS
   Span<const hal::NetPeer> peers() const override {
     return Span<const hal::NetPeer>(near_, nearCount_);

@@ -482,7 +482,8 @@ void LightsBase::commands(CommandSet& set) {
             l.color = next;
             l.effect = -1;
             return turnOn(i);
-          });
+          },
+          kCmdEveryday);
   set.add("effect", LMP_HELP("An effect: christmas, rainbow, breath, blink, fade; on the LEDs also chase, wheel, comet, sparkle. Turns the light on"),
           kEffectArgs, [this](const Args& a, CmdContext& ctx) -> Status {
             uint8_t i = 0;
@@ -497,7 +498,8 @@ void LightsBase::commands(CommandSet& set) {
             l.startMs = nowMs_;
             memset(l.spark, 0, sizeof(l.spark));
             return turnOn(i);
-          });
+          },
+          kCmdEveryday);
   set.add("brightness", LMP_HELP("Brightness in percent, 1 to 100"), kPercentArgs,
           [this](const Args& a, CmdContext& ctx) -> Status {
             uint8_t i = 0;
@@ -505,7 +507,8 @@ void LightsBase::commands(CommandSet& set) {
             state_[i].brightness = a.u8("value");
             unsaved();
             return Status::Ok;
-          });
+          },
+          kCmdEveryday);
   set.add("speed", LMP_HELP("Speed of the effects, 1 to 100"), kPercentArgs,
           [this](const Args& a, CmdContext& ctx) -> Status {
             uint8_t i = 0;
@@ -513,7 +516,8 @@ void LightsBase::commands(CommandSet& set) {
             state_[i].speed = a.u8("value");
             unsaved();
             return Status::Ok;
-          });
+          },
+          kCmdEveryday);
   set.add("power", LMP_HELP("Turns a light on or off, with its last colour or effect"), kPowerArgs,
           [this](const Args& a, CmdContext& ctx) -> Status {
             uint8_t i = 0;
@@ -524,7 +528,8 @@ void LightsBase::commands(CommandSet& set) {
               return Status::Denied;
             }
             return bank_.set(i, a.boolean("value"));
-          });
+          },
+          kCmdEveryday);
 }
 
 // ---------------------------------------------------------------- document and file

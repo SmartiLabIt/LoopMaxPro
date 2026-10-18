@@ -253,6 +253,13 @@ void fieldSpecDescribe(JsonWriter& w, const FieldSpec& s, size_t stringCapacity)
   if (s.flags & kFieldSecret) w.boolean("secret", true);
   if (s.flags & kFieldReadOnly) w.boolean("readOnly", true);
   if (s.flags & kFieldLocked) w.boolean("locked", true);
+  if (s.unitName && *s.unitName) w.str("unit", s.unitName);
+  if (s.flags & kFieldTechnical) w.boolean("technical", true);
+  if (s.choiceList && s.choiceCount) {
+    w.beginArray("choices");
+    for (uint8_t i = 0; i < s.choiceCount; ++i) w.str(StringView(s.choiceList[i]));
+    w.endArray();
+  }
 }
 
 void fieldsSchema(JsonWriter& w, Span<const FieldDesc> fields) {

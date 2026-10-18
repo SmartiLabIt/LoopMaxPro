@@ -375,6 +375,7 @@ Status CommandBus::manifest(StringView target, JsonWriter& w, bool withHelp) con
     if (c.flags & kCmdSensitive) w.boolean("sensitive", true);
     if (c.flags & kCmdSecret) w.boolean("secret", true);
     if (c.flags & kCmdUi) w.boolean("ui", true);
+    if (c.flags & kCmdEveryday) w.boolean("everyday", true);
     w.beginArray("args");
     for (uint8_t a = 0; a < c.argCount; ++a) {
       const ArgSpec& spec = c.args[a];

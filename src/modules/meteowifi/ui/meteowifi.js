@@ -184,11 +184,14 @@ function Place({ ctx }) {
 
 export default {
   uiApi: 1,
+  // The phrases of the console this page uses, with their keys (F31 of the server).
+  same: {
+    'mod.meteowifi.place': 'geo.city', 'mod.meteowifi.search': 'net.scan',
+  },
   texts: {
     it: {
-      'mod.meteowifi.place': 'Città', 'mod.meteowifi.change': 'Cambia città',
+      'mod.meteowifi.change': 'Cambia città',
       'mod.meteowifi.name': 'Nome della città', 'mod.meteowifi.example': 'Milano oppure Milano, IT',
-      'mod.meteowifi.search': 'Cerca',
       'mod.meteowifi.help': 'Qualsiasi città del mondo. Con la sigla della nazione (IT, FR, US) l\'elenco si restringe. Tocca la città giusta nell\'elenco.',
       'mod.meteowifi.none': 'nessuna città',
       'mod.meteowifi.here': 'Usa la posizione del dispositivo',
@@ -199,11 +202,14 @@ export default {
       'mod.meteowifi.people': 'ab.',
       'mod.meteowifi.unreachable': 'Questo telefono o PC non raggiunge il servizio di ricerca. Il dispositivo può cercare il nome da solo e prendere la città più probabile.',
       'mod.meteowifi.byDevice': 'Cerca dal dispositivo',
+      // The names of commands and arguments, for who shows them without the page (F30).
+      'mod.meteowifi.location': 'Città del meteo',
+      'mod.meteowifi.refresh': 'Aggiorna il meteo',
+      'mod.meteowifi.units': 'Gradi',
     },
     en: {
-      'mod.meteowifi.place': 'City', 'mod.meteowifi.change': 'Change city',
+      'mod.meteowifi.change': 'Change city',
       'mod.meteowifi.name': 'Name of the city', 'mod.meteowifi.example': 'Milan or Milan, IT',
-      'mod.meteowifi.search': 'Search',
       'mod.meteowifi.help': 'Any city of the world. With the two letters of the country (IT, FR, US) the list gets shorter. Tap the right city in the list.',
       'mod.meteowifi.none': 'no city',
       'mod.meteowifi.here': 'Use the position of the device',
@@ -214,6 +220,10 @@ export default {
       'mod.meteowifi.people': 'pop.',
       'mod.meteowifi.unreachable': 'This phone or PC does not reach the search service. The device can look for the name itself and take the most likely city.',
       'mod.meteowifi.byDevice': 'Search from the device',
+      // The names of commands and arguments, for who shows them without the page (F30).
+      'mod.meteowifi.location': 'City of the weather',
+      'mod.meteowifi.refresh': 'Refresh the weather',
+      'mod.meteowifi.units': 'Degrees',
     },
   },
   tabs: [

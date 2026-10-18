@@ -780,16 +780,20 @@ void test_the_modules_of_the_products_say_their_things() {
                    Status::Ok);
   sys.advance(500);
   Answer what(sys, "mod.zappy2", "things", "{}");
-  TEST_ASSERT_EQUAL_UINT(3, what.v["things"].size());
+  TEST_ASSERT_EQUAL_UINT(5, what.v["things"].size());
   TEST_ASSERT_TRUE(what.v["things"].at(0)["id"].stringEquals("ch0"));
   TEST_ASSERT_TRUE(what.v["things"].at(0)["kind"].stringEquals("toggle"));
   TEST_ASSERT_TRUE(what.v["things"].at(0)["type"].stringEquals("outlet"));
   TEST_ASSERT_TRUE(what.v["things"].at(0)["name"].stringEquals("Lamp"));
   TEST_ASSERT_FALSE(what.v["partThings"].valid());
-  // And a button for all of them: what the command "flip" does, to press.
-  TEST_ASSERT_TRUE(what.v["things"].at(2)["id"].stringEquals("flip"));
-  TEST_ASSERT_TRUE(what.v["things"].at(2)["kind"].stringEquals("button"));
-  TEST_ASSERT_TRUE(what.v["things"].at(2)["name"]["it"].stringEquals("Inverti"));
+  // And buttons for all of them: what the commands "all" and "flip" do, to press. The commands
+  // of every day are buttons too, "all" with each of its two values (F30 of the server).
+  TEST_ASSERT_TRUE(what.v["things"].at(2)["id"].stringEquals("all_on"));
+  TEST_ASSERT_TRUE(what.v["things"].at(2)["name"]["it"].stringEquals("Tutti accesi"));
+  TEST_ASSERT_TRUE(what.v["things"].at(3)["id"].stringEquals("all_off"));
+  TEST_ASSERT_TRUE(what.v["things"].at(4)["id"].stringEquals("flip"));
+  TEST_ASSERT_TRUE(what.v["things"].at(4)["kind"].stringEquals("button"));
+  TEST_ASSERT_TRUE(what.v["things"].at(4)["name"]["it"].stringEquals("Inverti"));
   // Turned on as the server does it, and seen in the document.
   TEST_ASSERT_TRUE(sys.command("mod.zappy2", "thing.set", "{\"thing\":\"ch1\",\"value\":\"ON\"}") ==
                    Status::Ok);
@@ -810,6 +814,21 @@ void test_the_modules_of_the_products_say_their_things() {
   // It is pressed, not turned.
   TEST_ASSERT_TRUE(sys.command("mod.zappy2", "thing.set", "{\"thing\":\"flip\",\"value\":\"ON\"}") ==
                    Status::Invalid);
+  // All on, all off.
+  TEST_ASSERT_TRUE(sys.command("mod.zappy2", "thing.set", "{\"thing\":\"all_on\",\"value\":\"PRESS\"}") ==
+                   Status::Ok);
+  sys.advance(500);
+  {
+    Doc on(sys.kernel(), "mod.zappy2");
+    TEST_ASSERT_TRUE(on.v["things"]["values"]["ch0"].asBool(false));
+    TEST_ASSERT_TRUE(on.v["things"]["values"]["ch1"].asBool(false));
+  }
+  TEST_ASSERT_TRUE(sys.command("mod.zappy2", "thing.set", "{\"thing\":\"all_off\",\"value\":\"PRESS\"}") ==
+                   Status::Ok);
+  sys.advance(500);
+  Doc off(sys.kernel(), "mod.zappy2");
+  TEST_ASSERT_FALSE(off.v["things"]["values"]["ch0"].asBool(true));
+  TEST_ASSERT_FALSE(off.v["things"]["values"]["ch1"].asBool(true));
 }
 
 // The rule: every module tells its things, what who uses it reads and commands. Without them

@@ -65,6 +65,8 @@ class PinBankBase : public Component {
   Status set(uint8_t channel, bool on);
   Status toggle(uint8_t channel);
   Status setAll(bool on);
+  // Every channel on or off, except those a schedule holds now: the command "all".
+  Status setFree(bool on);
   // Every channel into the opposite of what it is, except those a schedule holds now.
   Status flipAll();
   // True when a schedule holds the channel now: the commands leave it alone.

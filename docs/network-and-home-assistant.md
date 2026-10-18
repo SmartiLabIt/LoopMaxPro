@@ -486,6 +486,7 @@ lmp::Status thingSet(const char* id, const lmp::sdk::ThingAsk& ask) override {
 | `range(min, max)` | The limits of the next number. They are for who reads the things as data: Home Assistant has no use for them on a sensor |
 | `measured(unixSeconds)` | When the next number was measured. For who reads the things as data too: Home Assistant gives its own time to what it receives |
 | `technical()` | The next thing, and only that one, is for who looks after the device: a broken sensor, a battery. Home Assistant keeps it among the diagnostic entities |
+| `sensitive()` | The next button, and only that one, undoes what does not come back, as the command of the module with its name: clearing a count. Home Assistant never gets it: the device tells its description empty, which also takes away the one an older firmware told |
 | `part(id, name)` | The things that follow belong to a part of the module that is a device of its own, reached through this one. A null id goes back to the device itself |
 
 - A name is one text, or two: English first, then Italian. Home Assistant gets the one of the

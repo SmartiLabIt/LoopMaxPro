@@ -3,6 +3,13 @@
 What each version fixes and adds. The newest on top. Written in English: the notes are
 shown as they are, in the console and on the server.
 
+## 1.0.6 (2026-10-18)
+
+- The names of its commands and settings, in English and Italian, travel with the console to a server; the phrases it has in common with its full version are kept once, with the same keys
+- Checking a service now is a command of every day; the test message to Telegram is a delicate one
+- The settings tell their unit and which ones are technical; who tells the traffic is a choice with its values
+- The devices in the network tell how many the list holds at most
+
 ## 1.0.5 (2026-10-14)
 
 - The commands say what they are: which ones only read, which ones reach other devices of the network. Nothing changes in the page

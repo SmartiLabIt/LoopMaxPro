@@ -31,12 +31,16 @@ enum FieldFlags : uint8_t {
   kFieldNone = 0,
   kFieldSecret = 1,    // accepted in input, never written in output
   kFieldReadOnly = 2,  // written in output, ignored in input
-  kFieldLocked = 4     // a setting of a fuller version of the module: shown with its default,
+  kFieldLocked = 4,    // a setting of a fuller version of the module: shown with its default,
                        // never taken, not even from the file
+  kFieldTechnical = 8  // for who looks after the device, not for every day: kept apart
 };
 
 // Limits and default of one field. For strings min and max are lengths.
 // Numbers are kept as double: whole values are exact up to 2^53.
+// What a setting is, for who shows it without knowing the module (F30 of the server): its unit,
+// whether it is technical, and for a choice the values it takes. The names, in the languages,
+// are in the package of the console, not in the firmware.
 struct FieldSpec {
   FieldKind kind;
   double min;
@@ -44,15 +48,30 @@ struct FieldSpec {
   double def;
   const char* defStr;
   uint8_t flags;
+  const char* unitName = nullptr;            // "cm", "%", "min", "ms"
+  const char* const* choiceList = nullptr;   // the values it takes, as they are written
+  uint8_t choiceCount = 0;
 
-  constexpr FieldSpec secret() const {
-    return FieldSpec{kind, min, max, def, defStr, static_cast<uint8_t>(flags | kFieldSecret)};
+  constexpr FieldSpec with(uint8_t flag) const {
+    FieldSpec s = *this;
+    s.flags = static_cast<uint8_t>(s.flags | flag);
+    return s;
   }
-  constexpr FieldSpec readOnly() const {
-    return FieldSpec{kind, min, max, def, defStr, static_cast<uint8_t>(flags | kFieldReadOnly)};
+  constexpr FieldSpec secret() const { return with(kFieldSecret); }
+  constexpr FieldSpec readOnly() const { return with(kFieldReadOnly); }
+  constexpr FieldSpec locked() const { return with(kFieldLocked); }
+  constexpr FieldSpec technical() const { return with(kFieldTechnical); }
+  constexpr FieldSpec unit(const char* name) const {
+    FieldSpec s = *this;
+    s.unitName = name;
+    return s;
   }
-  constexpr FieldSpec locked() const {
-    return FieldSpec{kind, min, max, def, defStr, static_cast<uint8_t>(flags | kFieldLocked)};
+  template <size_t N>
+  constexpr FieldSpec choices(const char* const (&list)[N]) const {
+    FieldSpec s = *this;
+    s.choiceList = list;
+    s.choiceCount = static_cast<uint8_t>(N);
+    return s;
   }
 };
 

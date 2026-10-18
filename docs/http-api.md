@@ -264,18 +264,24 @@ GET /api/manifest/sys.web
 | `sensitive` | the command acts outside the device, or undoes what does not come back: not to be offered lightly |
 | `secret` | the answer of the command carries something to keep: not to be shown, not to be written down |
 | `ui` | the command serves the page of the module: of no use to who does not draw it |
+| `everyday` | the command is of every day: simple and safe, to give to who commands the device (a home system, a voice assistant) without the rights of the advanced. Never with `sensitive`, `secret`, `ui` or `confirm` |
 | `args[].type` | `bool`, `u8`, `u16`, `u32`, `i8`, `i16`, `i32`, `i64`, `f32`, `f64`, `str` |
 | `args[].min`, `max` | limits of a number; shortest and longest length of a text |
 | `args[].def`, `secret`, `required` | default value; a text never to be shown or logged; whether it must be there |
 
-`confirm`, `async`, `anyArgs`, `readOnly`, `sensitive`, `secret` and `ui` are there only when
-they are true. A command that says none of the last four is to be taken as one that changes
-something: the commands of the system do not say them.
+`confirm`, `async`, `anyArgs`, `readOnly`, `sensitive`, `secret`, `ui` and `everyday` are there
+only when they are true. A command that says none of `readOnly`, `sensitive`, `secret`, `ui` is
+to be taken as one that changes something, and one without `everyday` as advanced: the commands
+of the system do not say them.
 
 The manifest of a module has two members more: `module` (`title`, `icon`, `kind`, `version`,
 `code`) and, when the module has settings, `config`, their schema: a list of fields, each with
 `key`, `type`, `min`, `max` and `def`, and with `secret`, `readOnly` or `locked` where they
-apply.
+apply. A field may also say `unit` (`cm`, `%`, `min`, `ms`, `s`, `h`, `Hz`), `technical` (for
+who looks after the device) and, for a choice, `choices`: the values it takes, as they are
+written. The arguments of the commands may say the same. The names of commands, arguments,
+settings and choices, in the languages, are not in the manifest: they are in the package of the
+console, which a server takes with the firmware.
 
 `GET /api/manifest/<target>?help=0` leaves the help texts out: for an answer that would not fit
 in a small board.

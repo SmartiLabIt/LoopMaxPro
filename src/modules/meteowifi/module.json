@@ -2,7 +2,7 @@
   "name": "meteowifi",
   "kind": "online",
   "title": "MeteoWifi",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "icon": "🌤",
   "uiApi": 1,
   "ui": "ui/meteowifi.js",
