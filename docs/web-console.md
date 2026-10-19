@@ -213,6 +213,7 @@ export default {
 | `tabs` | the tabs of the module. An `id` equal to a standard one (`home`, `schedules`, `settings`, `info`) **takes its place**; any other `id` is one more tab, after Device. `label` is the key of a text; `icon` a name of the kit |
 | `view` | a Preact component, drawn with `ctx.html`. It receives `{ ctx }` |
 | `mount(el, ctx)` | in place of `view`: draws into `el` as it likes, even without Preact. What it returns (a function, or an object with `destroy`) is called when the tab closes |
+| `settings` | a Preact component drawn under the standard settings of the module, in the same tab: something more to set, without taking the place of the form. It receives `{ ctx }` |
 
 ### What it receives: `ctx`
 
@@ -231,6 +232,7 @@ export default {
 | `stream(name, args, key)` | for a value that follows a finger, such as a slider: never two travelling for the same `key`, and the last value always arrives |
 | `useBusy()` | true while a command is with the device, to draw something of your own |
 | `useSysDoc(target, everyMs)`, `sysRead(target, name, args)` | for a module that shows the device itself: the document of a `sys.` target inside a component, read again every `everyMs` (0: once), and a command of it that does not block. `sys.` targets only |
+| `sysAct(target, name, args, okText)` | a command of the system that changes something, for a module that offers it among its settings (the way to the network, `sys.net setLink`): it blocks and tells how it went, as `act`. `sys.` targets only |
 | `hasService(name)` | true when the firmware has that service, `mqtt` for example |
 | `config()`, `saveConfig(values)` | the settings without the secrets; `saveConfig` sends the values it is given with `config.set`: give it only what changed |
 | `toast(text, kind)`, `confirm({ title, text, okLabel, danger })` | the notices and the confirmation window of the console. `confirm` resolves true or false |

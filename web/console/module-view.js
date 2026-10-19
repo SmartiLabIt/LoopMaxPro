@@ -108,7 +108,9 @@ export function ModuleSpace({ entry, tab }) {
     ${ui && ui.error && html`<${Notice} kind="warn">${t('mod.uiMissing')}<//>`}
     ${own ? html`<${ModuleUiTab} key=${own.id} name=${entry.name} tab=${own}/>`
       : tab === 'schedules' ? html`<${Schedules} target=${target} doc=${doc}/>`
-      : tab === 'settings' ? html`<${ModuleSettings} target=${target} manifest=${manifest}/>`
+      : tab === 'settings' ? html`<${ModuleSettings} target=${target} manifest=${manifest}/>
+          ${ui && !ui.error && ui.settings && html`<${ModuleUiTab} name=${entry.name}
+            tab=${{ id: 'settings', view: ui.settings }}/>`}`
       : tab === 'info' ? html`<${ModuleInfo} entry=${entry} info=${info} target=${target}
                                 doc=${doc} manifest=${manifest}/>`
       : html`<${ModuleHome} target=${target} doc=${doc} manifest=${manifest}/>`}

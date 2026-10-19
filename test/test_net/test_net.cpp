@@ -8,6 +8,7 @@
 
 #include "../support/test_support.h"
 #include "app/loopmax.h"
+#include "hal/native/native_link.h"
 
 using namespace lmp;
 using namespace lmp::test;
@@ -1092,6 +1093,228 @@ void test_an_access_point_that_does_not_start() {
   TEST_ASSERT_EQUAL_INT(0, sys.count(EventId::NetApUp));
 }
 
+// ---------------------------------------------------------------- cable
+
+namespace {
+
+// The settings of a device whose owner chose the cable.
+void cableChosen(TestBoard& tb) {
+  tb.board.kv->begin();
+  Config config(tb.board.kv, tb.board.rng, tb.board.sys);
+  config.load();
+  config.net.link.assign("eth");
+  config.sys.mode = 2;
+  config.touch(Config::kNet);
+  config.touch(Config::kSys);
+  TEST_ASSERT_TRUE(config.save() == Status::Ok);
+}
+
+}  // namespace
+
+void test_a_cable_mounted_is_offered_and_the_wifi_stays() {
+  TestBoard tb;
+  hal::native::Link cable;
+  tb.board.cable = &cable;
+  System sys(tb);
+
+  // Nothing chosen: the device starts as it always did, on its access point.
+  TEST_ASSERT_TRUE(sys.kernel().mode() == Mode::Ap);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::ApOnly);
+  TEST_ASSERT_TRUE(sys.net().link() == hal::LinkKind::Wifi);
+  TEST_ASSERT_EQUAL_UINT(0, cable.starts());
+  Doc doc(sys.kernel());
+  TEST_ASSERT_TRUE(doc.v["link"].stringEquals("wifi"));
+  TEST_ASSERT_EQUAL_UINT(2, doc.v["links"].size());
+  TEST_ASSERT_TRUE(doc.v["links"].at(0).stringEquals("wifi"));
+  TEST_ASSERT_TRUE(doc.v["links"].at(1).stringEquals("eth"));
+  TEST_ASSERT_TRUE(doc.v["eth"]["state"].stringEquals("off"));
+  TEST_ASSERT_FALSE(doc.v["eth"]["connected"].asBool(true));
+}
+
+void test_the_cable_chosen_from_the_access_point() {
+  TestBoard tb;
+  hal::native::Link cable;
+  tb.board.cable = &cable;
+  System sys(tb);
+
+  TEST_ASSERT_TRUE(sys.command("setLink", R"({"link":"eth"})") == Status::Ok);
+  sys.advance(1000);
+  TEST_ASSERT_TRUE(sys.kernel().mode() == Mode::Lan);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::Connected);
+  TEST_ASSERT_TRUE(sys.net().link() == hal::LinkKind::Ethernet);
+  TEST_ASSERT_TRUE(sys.config().net.link == "eth");
+  TEST_ASSERT_EQUAL_UINT8(2, sys.config().sys.mode);
+  TEST_ASSERT_EQUAL_UINT(0, sys.radio().connects());   // the Wi-Fi joins nothing
+  TEST_ASSERT_TRUE(sys.net().address() == hal::Ip4::of(10, 0, 0, 20));
+  // Who chose it from the access point can still read where the device went, for a while.
+  TEST_ASSERT_TRUE(sys.net().apUp());
+  sys.advance(31000);
+  TEST_ASSERT_FALSE(sys.net().apUp());
+}
+
+void test_a_cable_chosen_connects_by_itself() {
+  TestBoard tb;
+  hal::native::Link cable;
+  tb.board.cable = &cable;
+  cableChosen(tb);
+  System sys(tb);
+
+  TEST_ASSERT_TRUE(sys.kernel().mode() == Mode::Lan);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::Connected);
+  TEST_ASSERT_TRUE(sys.net().connected());
+  TEST_ASSERT_TRUE(sys.net().link() == hal::LinkKind::Ethernet);
+  TEST_ASSERT_FALSE(sys.net().apUp());
+  TEST_ASSERT_EQUAL_INT(1, sys.count(EventId::NetStaConnected));
+  TEST_ASSERT_EQUAL_INT(0, sys.count(EventId::NetApUp));
+  TEST_ASSERT_EQUAL_UINT(0, sys.radio().connects());
+  TEST_ASSERT_EQUAL_UINT(1, cable.starts());
+  TEST_ASSERT_EQUAL_STRING("loopmax-0001", cable.hostname().c_str());
+  TEST_ASSERT_TRUE(sys.net().address() == hal::Ip4::of(10, 0, 0, 20));
+  TEST_ASSERT_EQUAL_INT(0, sys.net().signal());
+
+  Doc doc(sys.kernel());
+  TEST_ASSERT_TRUE(doc.v["link"].stringEquals("eth"));
+  TEST_ASSERT_TRUE(doc.v["state"].stringEquals("connected"));
+  TEST_ASSERT_TRUE(doc.v["eth"]["connected"].asBool());
+  TEST_ASSERT_TRUE(doc.v["eth"]["state"].stringEquals("connected"));
+  TEST_ASSERT_TRUE(doc.v["eth"]["ip"].stringEquals("10.0.0.20"));
+  TEST_ASSERT_TRUE(doc.v["eth"]["gateway"].stringEquals("10.0.0.1"));
+  TEST_ASSERT_EQUAL_INT64(100, doc.v["eth"]["speed"].asInt());
+  TEST_ASSERT_TRUE(doc.v["eth"]["mac"].stringEquals("02:4C:4D:45:00:01"));
+  TEST_ASSERT_FALSE(doc.v["sta"]["connected"].asBool(true));
+}
+
+void test_the_wifi_says_its_link() {
+  TestBoard tb;
+  System sys(tb);
+  TEST_ASSERT_TRUE(sys.net().link() == hal::LinkKind::Wifi);
+  Doc doc(sys.kernel());
+  TEST_ASSERT_TRUE(doc.v["link"].stringEquals("wifi"));
+  TEST_ASSERT_EQUAL_UINT(1, doc.v["links"].size());
+  TEST_ASSERT_FALSE(doc.v["eth"].valid());
+  // Without a cable it cannot be chosen; the modem is not written yet.
+  const char* field = nullptr;
+  TEST_ASSERT_TRUE(sys.command("setLink", R"({"link":"eth"})", &field) == Status::Denied);
+  TEST_ASSERT_EQUAL_STRING("link", field);
+  TEST_ASSERT_TRUE(sys.command("setLink", R"({"link":"cell"})") == Status::Unsupported);
+  TEST_ASSERT_TRUE(sys.command("setLink", R"({"link":"fax"})") == Status::Invalid);
+  TEST_ASSERT_TRUE(sys.config().net.link == "wifi");
+}
+
+void test_a_cable_out_brings_the_access_point_up() {
+  TestBoard tb;
+  hal::native::Link cable;
+  tb.board.cable = &cable;
+  cableChosen(tb);
+  System sys(tb);
+  TEST_ASSERT_TRUE(sys.net().connected());
+
+  cable.plug(false);
+  sys.advance(1000);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::Retrying);
+  TEST_ASSERT_FALSE(sys.net().connected());
+  TEST_ASSERT_EQUAL_INT(1, sys.count(EventId::NetStaLost));
+  TEST_ASSERT_FALSE(sys.net().apUp());
+
+  // Without an address for long, the access point is the way in.
+  sys.advance(LMP_NET_LINK_WAIT_SEC * 1000u);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::Fallback);
+  TEST_ASSERT_TRUE(sys.net().apUp());
+  TEST_ASSERT_TRUE(logHas(sys.kernel(), "access point up as a fallback"));
+  TEST_ASSERT_EQUAL_UINT(0, sys.radio().connects());   // the Wi-Fi is not taken by itself
+
+  // The cable back: on the network again, and the access point goes down a while later.
+  cable.plug(true);
+  sys.advance(1000);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::Connected);
+  TEST_ASSERT_EQUAL_INT(2, sys.count(EventId::NetStaConnected));
+  TEST_ASSERT_TRUE(sys.net().apUp());
+  sys.advance(31000);
+  TEST_ASSERT_FALSE(sys.net().apUp());
+}
+
+void test_a_cable_chosen_whose_chip_does_not_answer() {
+  TestBoard tb;
+  hal::native::Link cable;
+  cable.setMissing(true);
+  tb.board.cable = &cable;
+  cableChosen(tb);
+  System sys(tb);
+
+  // The device stays reachable on its access point, and says why.
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::Fallback);
+  TEST_ASSERT_TRUE(sys.net().apUp());
+  TEST_ASSERT_FALSE(sys.net().connected());
+  TEST_ASSERT_TRUE(logHas(sys.kernel(), "its chip does not answer"));
+  Doc doc(sys.kernel());
+  TEST_ASSERT_TRUE(doc.v["eth"]["state"].stringEquals("missing"));
+  TEST_ASSERT_EQUAL_UINT(1, doc.v["links"].size());
+
+  // Back to the Wi-Fi, from the same page: no network configured, the access point.
+  TEST_ASSERT_TRUE(sys.command("setLink", R"({"link":"wifi"})") == Status::Ok);
+  sys.advance(1000);
+  TEST_ASSERT_TRUE(sys.kernel().mode() == Mode::Ap);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::ApOnly);
+  TEST_ASSERT_TRUE(sys.config().net.link == "wifi");
+}
+
+void test_from_the_cable_back_to_the_wifi_network() {
+  TestBoard tb;
+  hal::native::Link cable;
+  tb.board.cable = &cable;
+  tb.native().net.addNetwork(kHome, kHomePassword);
+  provision(tb, kHome, kHomePassword);
+  System sys(tb);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::Connected);
+  TEST_ASSERT_TRUE(sys.net().link() == hal::LinkKind::Wifi);
+
+  TEST_ASSERT_TRUE(sys.command("setLink", R"({"link":"eth"})") == Status::Ok);
+  sys.advance(1000);
+  TEST_ASSERT_TRUE(sys.net().link() == hal::LinkKind::Ethernet);
+  TEST_ASSERT_TRUE(sys.net().address() == hal::Ip4::of(10, 0, 0, 20));
+  Doc onCable(sys.kernel());
+  TEST_ASSERT_FALSE(onCable.v["sta"]["connected"].asBool(true));
+
+  // The network of before is still in the settings: the Wi-Fi goes back to it.
+  TEST_ASSERT_TRUE(sys.command("setLink", R"({"link":"wifi"})") == Status::Ok);
+  sys.advance(1000);
+  TEST_ASSERT_TRUE(sys.net().link() == hal::LinkKind::Wifi);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::Connected);
+  TEST_ASSERT_TRUE(sys.net().address() == hal::Ip4::of(192, 168, 1, 50));
+  hal::LinkInfo link;
+  cable.info(link);
+  TEST_ASSERT_TRUE(link.state == hal::LinkState::Off);
+}
+
+void test_with_the_cable_the_wifi_is_not_joined() {
+  TestBoard tb;
+  hal::native::Link cable;
+  tb.board.cable = &cable;
+  cableChosen(tb);
+  System sys(tb);
+
+  TEST_ASSERT_TRUE(sys.command("join", R"({"ssid":"Home","psw":"home-password"})") ==
+                   Status::Unsupported);
+  TEST_ASSERT_TRUE(sys.command("test", R"({"ssid":"Home","psw":"home-password"})") ==
+                   Status::Unsupported);
+
+  // AP: the access point alone, the cable left.
+  TEST_ASSERT_TRUE(sys.command("setMode", R"({"mode":"AP"})") == Status::Ok);
+  sys.advance(1000);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::ApOnly);
+  TEST_ASSERT_TRUE(sys.net().apUp());
+  hal::LinkInfo link;
+  cable.info(link);
+  TEST_ASSERT_TRUE(link.state == hal::LinkState::Off);
+
+  // LAN needs no network configured: the cable is the network.
+  TEST_ASSERT_TRUE(sys.command("setMode", R"({"mode":"LAN"})") == Status::Ok);
+  sys.advance(1000);
+  TEST_ASSERT_TRUE(sys.net().netState() == NetState::Connected);
+  TEST_ASSERT_EQUAL_UINT(2, cable.starts());
+  TEST_ASSERT_EQUAL_UINT(0, sys.radio().connects());
+}
+
 int main(int, char**) {
   UNITY_BEGIN();
   RUN_TEST(test_first_start_is_an_access_point);
@@ -1132,5 +1355,13 @@ int main(int, char**) {
   RUN_TEST(test_a_board_without_network_still_starts);
   RUN_TEST(test_a_radio_that_does_not_start_is_tried_again);
   RUN_TEST(test_an_access_point_that_does_not_start);
+  RUN_TEST(test_a_cable_mounted_is_offered_and_the_wifi_stays);
+  RUN_TEST(test_the_cable_chosen_from_the_access_point);
+  RUN_TEST(test_a_cable_chosen_connects_by_itself);
+  RUN_TEST(test_the_wifi_says_its_link);
+  RUN_TEST(test_a_cable_out_brings_the_access_point_up);
+  RUN_TEST(test_a_cable_chosen_whose_chip_does_not_answer);
+  RUN_TEST(test_from_the_cable_back_to_the_wifi_network);
+  RUN_TEST(test_with_the_cable_the_wifi_is_not_joined);
   return UNITY_END();
 }

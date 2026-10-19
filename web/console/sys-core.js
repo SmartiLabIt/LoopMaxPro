@@ -54,9 +54,11 @@ export function Overview({ go }) {
         sub=${t('ov.reset') + ': ' + t('reset.' + sys.resetReason)}/>
       <${Stat} icon="memory-stick" label=${t('ov.heap')} value=${fmtBytes(sys.heap.free)}
         sub=${t('ov.heapMin', { n: fmtBytes(sys.heap.min) })}/>
-      <${Stat} icon=${net && net.sta && net.sta.connected ? 'wifi' : 'router'} label=${t('ov.network')}
+      ${net && net.eth && net.eth.connected
+        ? html`<${Stat} icon="cable" label=${t('ov.network')} value="LAN" sub=${net.eth.ip}/>`
+        : html`<${Stat} icon=${net && net.sta && net.sta.connected ? 'wifi' : 'router'} label=${t('ov.network')}
         value=${net && net.sta && net.sta.connected ? net.sta.ssid : net && net.ap && net.ap.up ? net.ap.ssid : '–'}
-        sub=${net && net.sta && net.sta.connected ? net.sta.ip : net && net.ap ? net.ap.ip : ''}/>
+        sub=${net && net.sta && net.sta.connected ? net.sta.ip : net && net.ap ? net.ap.ip : ''}/>`}
       <${Stat} icon="clock" label=${t('ov.time')}
         value=${clock ? fmtDeviceTime(clock.unix, clock.offset) : t('clock.unknown')}
         sub=${clock ? fmtDeviceDate(clock.unix, clock.offset) + ' · ' + clock.tz : ''}
@@ -184,6 +186,10 @@ export function Network({ go }) {
   const sta = net.sta || {};
   const ap = net.ap || {};
   const scan = net.scan || { state: 'idle', networks: [] };
+  // The cable, chosen where the device offers it (a module among its settings).
+  const cable = net.link === 'eth';
+  const eth = net.eth || {};
+  const connected = sta.connected || (cable && eth.connected);
 
   const setMode = async (mode) => {
     const yes = await confirmDialog({ title: t('net.modeTitle'), text: t('net.modeText.' + mode) });
@@ -201,7 +207,17 @@ export function Network({ go }) {
       ${t('net.defaultPsw')}<//>`}
 
     <div class="grid2">
-      <${Card} title=${t('net.client')} icon="wifi"
+      ${cable ? html`<${Card} title=${t('net.cable')} icon="cable" sub=${t('net.state.' + net.state)}>
+        ${eth.connected ? html`<${KV} rows=${[
+            [t('net.ip'), eth.ip], [t('net.gateway'), eth.gateway], [t('net.mask'), eth.mask],
+            [t('net.dns'), eth.dns], [t('net.speed'), eth.speed ? eth.speed + ' Mbit/s' : null],
+            [t('net.mac'), eth.mac],
+            [t('net.internet'), net.internetChecked === undefined ? null
+              : html`<${Badge} kind=${net.internet ? 'ok' : net.internetChecked ? 'err' : 'off'}>
+                  ${net.internet ? t('yes') : net.internetChecked ? t('no') : t('net.unchecked')}<//>`]]}/>`
+          : html`<p class="muted">${t(eth.state === 'missing' ? 'net.cableMissing' : 'net.cableWait')}</p>
+            <${KV} rows=${[[t('net.mac'), eth.mac]]}/>`}
+      <//>` : html`<${Card} title=${t('net.client')} icon="wifi"
           sub=${t('net.state.' + net.state)}>
         ${sta.connected ? html`
           <div class="signal"><${Bars} level=${rssiBars(sta.rssi)}/><b>${sta.ssid}</b>
@@ -215,7 +231,7 @@ export function Network({ go }) {
         : html`
           <p class="muted">${sta.ssid ? t('net.tryingTo', { ssid: sta.ssid }) : t('net.noNetwork')}</p>
           <${KV} rows=${[[t('net.mac'), sta.mac], [t('net.failures'), sta.failures || null]]}/>`}
-      <//>
+      <//>`}
 
       <${Card} title=${t('net.ap')} icon="router"
           sub=${ap.up ? t('net.apUp') : t('net.apDown')}
@@ -234,7 +250,7 @@ export function Network({ go }) {
           data-net="mqtt" onClick=${() => go('mqtt')}>${t('net.haButton')}<//>`}>
       <b>${t('ha.title')}</b>
       <p>${told ? t('net.haTold', { n: mqtt.home.things })
-        : t(sta.connected ? 'net.haHint' : 'net.haHintAp')}</p>
+        : t(connected ? 'net.haHint' : 'net.haHintAp')}</p>
       <${Brands}/>
     <//>`}
 
@@ -242,7 +258,7 @@ export function Network({ go }) {
       <${Card} title=${t('net.mode')} icon="network">
         <${Segmented} value=${net.mode} onChange=${setMode} options=${[
           { id: 'AP', label: t('mode.AP'), icon: 'router' },
-          { id: 'LAN', label: t('mode.LAN'), icon: 'wifi' }]}/>
+          { id: 'LAN', label: t('mode.LAN'), icon: cable ? 'cable' : 'wifi' }]}/>
         <p class="muted small">${t('net.modeHelp')}</p>
         ${net.join && net.join.phase !== 'none' && html`<${Notice}>
           ${t('net.joinPhase', { ssid: net.join.ssid || '' })}: <b>${t('net.phase.' + net.join.phase)}</b>
@@ -259,7 +275,7 @@ export function Network({ go }) {
       <//>
     </div>
 
-    <${Card} title=${t('net.around')} icon="search"
+    ${!cable && html`<${Card} title=${t('net.around')} icon="search"
         sub=${scan.state === 'running' ? t('net.scanning') : scan.ageSec !== undefined ? t('net.scanAge', { n: scan.ageSec }) : ''}
         actions=${html`<${Btn} small icon="refresh-cw" busy=${scan.state === 'running'} onClick=${scanNow}>
           ${t('net.scan')}<//>`}>
@@ -276,7 +292,7 @@ export function Network({ go }) {
       </ul>` : html`<${Empty} icon="wifi-off">${t('net.noScan')}<//>`}
       <div class="card-foot"><${Btn} small icon="plus" onClick=${() => setJoining({ ssid: '', secured: true })}>
         ${t('net.other')}<//></div>
-    <//>
+    <//>`}
 
     ${joining && html`<${JoinDialog} network=${joining} onClose=${() => setJoining(null)}/>`}
     ${apForm && html`<${ApDialog} ap=${ap} onClose=${() => setApForm(false)}/>`}

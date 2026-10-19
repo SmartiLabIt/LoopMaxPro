@@ -144,6 +144,11 @@ export const DICT_EN = {
   'net.joinHelp': 'Try checks the password without leaving the network. Join moves the device: if the new network does not work, it comes back by itself.',
   'net.apPassword': 'New password', 'net.pswShort': 'At least 8 characters', 'net.apPswHint': 'Empty: keep the current one',
   'net.apRestart': 'The new name and password are used from the next restart.', 'net.apSaved': 'Saved: in use from the next restart',
+  'field.link': 'Connection', 'net.cable': 'Network cable', 'net.speed': 'Speed',
+  'net.cableWait': 'The cable gives no address yet: is it plugged into the router?',
+  'net.cableMissing': 'The LAN module does not answer: check that it is mounted, or go back to the Wi-Fi.',
+  'net.linkText.wifi': 'The device goes back to the Wi-Fi: to its network, or to its access point when it has none.',
+  'net.linkText.eth': 'The device connects through the network cable. The Wi-Fi network stays saved.',
 
   // the other devices
   'dev.title': 'LoopMaxPro devices', 'dev.search': 'Search',

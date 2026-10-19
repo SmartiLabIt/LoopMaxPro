@@ -510,6 +510,14 @@ const Board& board() {
     x.lora = &loraWiring();
     x.caps.add(Cap::Lora);
 #endif
+#ifndef PIO_UNIT_TESTING
+    // The simulator with a cable, to see the pages of a device that has one.
+    const char* cable = getenv("LMP_SIM_CABLE");
+    if (cable && strcmp(cable, "1") == 0) {
+      x.cable = &o.cable;
+      x.caps.add(Cap::Ethernet);
+    }
+#endif
     return x;
   }();
   return b;

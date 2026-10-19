@@ -37,6 +37,7 @@ idf_component_register(
     esp_driver_spi
     esp_driver_uart
     esp_driver_usb_serial_jtag
+    esp_eth
     esp_event
     esp_http_client
     esp_http_server
@@ -52,4 +53,5 @@ idf_component_register(
     mqtt
     nvs_flash
     esp_partition
-    spi_flash)
+    spi_flash
+    w5500)

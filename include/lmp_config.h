@@ -302,6 +302,50 @@
 #ifndef LMP_NET_GUARD_AGAIN_MIN
 #define LMP_NET_GUARD_AGAIN_MIN 60
 #endif
+// The ways to the network the device looks for at start, besides its Wi-Fi: a sum of the values
+// below. The same firmware runs with and without them: what answers is used, in this order: the
+// cable when it has an address, the Wi-Fi when a network is configured, the modem last. The
+// modem has its place kept and is not written yet: asking for it stops the build.
+#define LMP_NET_LINK_ETH 1
+#define LMP_NET_LINK_CELL 2
+#ifndef LMP_NET_LINKS
+#define LMP_NET_LINKS 0
+#endif
+#if (LMP_NET_LINKS) & LMP_NET_LINK_CELL
+#error "LMP_NET_LINK_CELL: the link through a modem is not written yet"
+#endif
+// The cable: a W5500 on SPI, on a bus of its own. -1: not wired; SCK, MOSI, MISO and CS are
+// required. Without the interrupt the driver asks the chip every LMP_ETH_POLL_MS.
+#ifndef LMP_ETH_PIN_SCK
+#define LMP_ETH_PIN_SCK -1
+#endif
+#ifndef LMP_ETH_PIN_MOSI
+#define LMP_ETH_PIN_MOSI -1
+#endif
+#ifndef LMP_ETH_PIN_MISO
+#define LMP_ETH_PIN_MISO -1
+#endif
+#ifndef LMP_ETH_PIN_CS
+#define LMP_ETH_PIN_CS -1
+#endif
+#ifndef LMP_ETH_SPI_MHZ
+#define LMP_ETH_SPI_MHZ 20
+#endif
+#ifndef LMP_ETH_PIN_INT
+#define LMP_ETH_PIN_INT -1
+#endif
+#ifndef LMP_ETH_PIN_RST
+#define LMP_ETH_PIN_RST -1
+#endif
+#ifndef LMP_ETH_POLL_MS
+#define LMP_ETH_POLL_MS 10
+#endif
+// Seconds a cable may stay without an address before the device turns to its Wi-Fi, or to the
+// access point as a fallback when no network is configured. The cable is still waited for, and
+// it is taken back as soon as it has an address.
+#ifndef LMP_NET_LINK_WAIT_SEC
+#define LMP_NET_LINK_WAIT_SEC 30
+#endif
 // Wrong passwords accepted from one address before it has to wait.
 #ifndef LMP_WEB_LOGIN_ATTEMPTS
 #define LMP_WEB_LOGIN_ATTEMPTS 5

@@ -66,9 +66,11 @@ export function Devices({ go }) {
   useTick(30000);
 
   const sta = (net && net.sta) || {};
+  // On the network with the Wi-Fi or with a cable: the others are looked for the same way.
+  const onNetwork = !!sta.connected || !!(net && net.eth && net.eth.connected);
   const near = net && net.near;
   const scan = (net && net.scan) || { state: 'idle', networks: [] };
-  const canNear = !!near && !!sta.connected;
+  const canNear = !!near && onNetwork;
 
   // One after the other: while the radio looks for the networks around, it does not hear the
   // answers of the other devices. They are questions, they change nothing on the device: the
@@ -98,7 +100,8 @@ export function Devices({ go }) {
       if (gone || !doc) return;
       const n = doc.near;
       const stale = n && n.state !== 'running' && (n.state !== 'done' || (n.ageSec || 0) > NEAR_FRESH_SEC);
-      run({ near: !!(doc.sta && doc.sta.connected && stale),
+      const onNetwork = (doc.sta && doc.sta.connected) || (doc.eth && doc.eth.connected);
+      run({ near: !!(onNetwork && stale),
             scan: !!(doc.scan && doc.scan.state === 'idle') });
     }).catch(() => {});
     return () => { gone = true; };
@@ -134,14 +137,14 @@ export function Devices({ go }) {
         sub=${nearGoing ? t('net.scanning') : canNear && near.state === 'done'
           ? t('dev.found', { n: near.devices.length }) + ' · ' + listAge(net, near) : ''}>
       ${!near ? html`<${Notice}>${t('dev.noSearch')}<//>`
-        : !sta.connected ? html`<${Notice} icon="wifi" action=${html`<${Btn} small kind="primary"
+        : !onNetwork ? html`<${Notice} icon="wifi" action=${html`<${Btn} small kind="primary"
               onClick=${() => go('network')}>${t('ban.setup')}<//>`}>${t('dev.notConnected')}<//>`
         : near.devices.length ? html`<ul class="devs">
             ${near.devices.map((d) => html`<li key=${d.id || d.host}><${Peer} d=${d}/></li>`)}</ul>`
         : near.state === 'failed' && !nearGoing ? html`<${Notice} kind="warn">${t('dev.failed')}<//>`
         : html`<${Empty} icon="network">${t(nearGoing ? 'dev.askingNet'
             : near.state === 'done' ? 'dev.nearNone' : 'dev.notYet')}<//>`}
-      ${near && sta.connected && html`<p class="muted small">
+      ${near && onNetwork && html`<p class="muted small">
         ${remote && near.devices.length ? t('dev.homeOnly') + ' ' : ''}${t('dev.nearNote')}</p>`}
     <//>
 

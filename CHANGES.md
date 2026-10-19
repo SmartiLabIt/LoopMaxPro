@@ -4,6 +4,13 @@ What each version fixes and adds. The newest on top. Written in English: the not
 shown as they are, in the console and on the server.
 The versions of the modules have their notes in the folder of each module.
 
+## 1.0.16 (2026-10-19)
+
+- A device can reach the network with a cable too, where its board has a cable module (W5500): the way is chosen in the settings, and the Network page shows the cable with its address and speed
+- On the cable, without an address for 30 seconds the device turns on its access point to let you in, and keeps waiting for the cable; it never goes back to the Wi-Fi by itself
+- The status bar says LAN when the device is on the cable
+- The page of a module can show a box of its own among its settings
+
 ## 1.0.15 (2026-10-18)
 
 - A module can read the signal of the Wi-Fi the device is on, and the local time of any moment, its daylight saving included: what a screen needs to show the signal and the hour of the last event

@@ -30,7 +30,10 @@ function StatusChips() {
   const sta = net && net.sta;
   const chips = [];
   if (net) {
-    if (sta && sta.connected) {
+    if (net.eth && net.eth.connected) {
+      chips.push(html`<span class="st ok" title=${t('net.cable') + ' · ' + net.eth.ip}>
+        <${Icon} name="cable" size=${16}/><span class="st-t">LAN</span></span>`);
+    } else if (sta && sta.connected) {
       chips.push(html`<span class="st ok" title=${sta.ssid + ' · ' + sta.ip + ' · ' + sta.rssi + ' dBm'}>
         <${Bars} level=${rssiBars(sta.rssi)}/><span class="st-t">${sta.ssid}</span></span>`);
     } else {

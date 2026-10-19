@@ -6,6 +6,7 @@
 #include "hal/api/icrypto.h"
 #include "hal/api/igpio.h"
 #include "hal/api/ihttp.h"
+#include "hal/api/ilink.h"
 #include "hal/api/inet.h"
 #include "hal/api/iprobe.h"
 #include "hal/api/iradio.h"
@@ -54,6 +55,10 @@ struct Board {
   IMqtt* cloudMqtt = nullptr;
   // Pings, ports, ARP, mDNS and SSDP: what the tools of a network ask (iprobe.h).
   INetProbe* probe = nullptr;
+  // The other ways to the network, besides the Wi-Fi (ilink.h): there when the build looks for
+  // them (LMP_NET_LINKS), usable when their chip answers. The modem is not written yet.
+  ILink* cable = nullptr;
+  ILink* modem = nullptr;
 
   // Chips on the board. Null when the board does not have them.
   const LoraWiring* lora = nullptr;

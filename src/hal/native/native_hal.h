@@ -9,6 +9,7 @@
 
 #include "hal/api/board.h"
 #include "hal/native/native_http.h"
+#include "hal/native/native_link.h"
 #include "hal/native/native_net.h"
 #include "hal/native/native_online.h"
 #include "hal/native/native_probe.h"
@@ -330,6 +331,9 @@ struct Objects {
   Ota ota;
   I2c i2c[LMP_HAL_I2C_MAX];
   Probe probe;
+  // A cable: the simulator has it with LMP_SIM_CABLE=1 in its environment; the tests plug it
+  // into the board they make.
+  Link cable;
 };
 
 Objects& objects();

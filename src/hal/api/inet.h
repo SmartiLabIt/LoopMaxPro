@@ -25,7 +25,9 @@ enum class NetEvent : uint8_t {
   ApStopped,
   ApClientJoined,
   ApClientLeft,
-  ScanDone
+  ScanDone,
+  LinkGotIp,        // the link that is not the Wi-Fi (ilink.h) has an address
+  LinkLost          // and has lost it: cable out, network gone
 };
 
 struct WifiNetwork {

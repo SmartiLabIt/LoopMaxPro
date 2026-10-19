@@ -8,6 +8,7 @@
 #if LMP_FEATURE_NET
 
 #include "base/fixed_string.h"
+#include "hal/api/ilink.h"
 #include "hal/api/inet.h"
 #include "kernel/kernel.h"
 
@@ -70,6 +71,8 @@ class INetService {
   // Starts a search of them now: they are in peers() a few seconds later. Busy while one runs,
   // Denied out of a network.
   virtual Status findPeers() = 0;
+  // How the device reaches the network: its Wi-Fi, or a cable chosen in the settings.
+  virtual hal::LinkKind link() const { return hal::LinkKind::Wifi; }
 };
 
 class NetService : public Service, public INetService {
@@ -102,6 +105,7 @@ class NetService : public Service, public INetService {
   Span<const hal::NetPeer> peers() const override { return Span<const hal::NetPeer>(); }
   Status findPeers() override { return Status::Unsupported; }
 #endif
+  hal::LinkKind link() const override { return link_ ? link_->kind() : hal::LinkKind::Wifi; }
 
   JoinPhase joinPhase() const { return join_; }
   JoinResult lastJoin() const { return lastJoin_; }
@@ -132,6 +136,13 @@ class NetService : public Service, public INetService {
   void onAttemptFailed(uint32_t nowMs, const char* why, hal::StaFail fail);
   void enterFallback(uint32_t nowMs);
   void scheduleRetry(uint32_t nowMs);
+  // The way to the network that is not the Wi-Fi: a cable or a modem. It needs no attempts:
+  // the address comes by itself, and the access point comes up while it does not.
+  void startLink(uint32_t nowMs);
+  void onLinkLost(uint32_t nowMs);
+  void armLinkWait(uint32_t nowMs);
+  // The way to the network chosen in the settings: "wifi", or one the board has and answers.
+  Status changeLink(const char* name, CmdContext& ctx);
 
   Status beginJoin(const char* ssid, const char* password, bool test, CmdContext& ctx);
   void joinAccepted(uint32_t nowMs);
@@ -150,6 +161,13 @@ class NetService : public Service, public INetService {
 
   Kernel* kernel_ = nullptr;
   hal::INet* net_ = nullptr;
+  // The cable of the board, when the build looks for one, and whether its chip answered.
+  hal::ILink* cable_ = nullptr;
+  bool cableFound_ = false;
+  // The way in use when it is not the Wi-Fi: the cable, chosen in the settings.
+  hal::ILink* link_ = nullptr;
+  bool linkWaitArmed_ = false;     // the access point comes up when the address is late
+  uint32_t linkWaitAtMs_ = 0;
   hal::IMutex* eventsMutex_ = nullptr;
   LogSource src_ = kLogSys;
   uint32_t pending_ = 0;

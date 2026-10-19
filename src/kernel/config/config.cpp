@@ -24,7 +24,8 @@ LMP_FIELDS(lmp::NetConfig,
   LMP_F(prevPsw,     "prevPsw",     Str(0, 63, "").secret().readOnly()),
   LMP_F(captive,     "captive",     Bool(true)),
   LMP_F(rollbackSec, "rollbackSec", U16(30, 3600, 180)),
-  LMP_F(probeUrl,    "probeUrl",    Str(0, 96, "http://connectivitycheck.gstatic.com/generate_204")))
+  LMP_F(probeUrl,    "probeUrl",    Str(0, 96, "http://connectivitycheck.gstatic.com/generate_204")),
+  LMP_F(link,        "link",        Str(3, 4, "wifi").readOnly()))
 
 LMP_FIELDS(lmp::WebConfig,
   LMP_F(adminPsw,      "adminPsw",      Str(0, 63, "").secret()),

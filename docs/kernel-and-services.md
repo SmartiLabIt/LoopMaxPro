@@ -604,9 +604,27 @@ through a power loss. When the address does not arrive within `rollbackSec`, or 
 refuses the device three times, the device goes back to the network it had and says why in
 `join.last`: `joined`, `tested`, `not_found`, `refused`, `timeout`.
 
-Document: `mode`, `state`, `sta` (`connected`, `ssid`, `ip`, `gateway`, `mask`, `dns`, `rssi`,
-`channel`, `mac`, `failures`), `ap` (`up`, `ssid`, `ip`, `clients`, `channel`, `captive`,
-`pswDefault`), `internet`, `internetChecked`, `mdns`, `host`, `join`, `scan`, `near`.
+**Other ways to the network: a cable, and the place of a modem.** The Wi-Fi is always there and is
+the way a device starts with. A build may look at start for other ways, `LMP_NET_LINKS`:
+`LMP_NET_LINK_ETH` for a cable, a W5500 on an SPI bus of its own (`LMP_ETH_PIN_SCK`, `MOSI`,
+`MISO`, `CS`, and `INT`, `RST` when wired; ESP-IDF builds, version 6 or later). The modem,
+`LMP_NET_LINK_CELL`, has its place kept and is not written yet: asking for it stops the build. The
+same firmware runs with and without the chip: when it does not answer, it is not mounted.
+
+| | |
+|---|---|
+| The choice | `net.link` in the settings, `wifi` or `eth`, read only: the command `setLink` changes it, and refuses a way the board does not have. It stays through the updates; a factory reset goes back to the Wi-Fi |
+| On the cable | mode `LAN` with nothing to set: the address comes from the network. The Wi-Fi client is not used (`join`, `test`: `unsupported`). Without an address for `LMP_NET_LINK_WAIT_SEC` (30 s) the access point comes up and the cable is still waited for; with the address the access point goes down 30 s later. It does not turn to the Wi-Fi by itself |
+| Chosen and not answering | the access point, the service degraded, the state `missing`: the Wi-Fi can be chosen again |
+| Where it is chosen | where the product offers it, a module among its settings (`settings` and `ctx.sysAct` in [the console](web-console.md)). The page of the network shows the cable while it is in use |
+| On the PC | the tests plug a simulated cable into the board; the simulator has one with `LMP_SIM_CABLE=1` |
+
+Document: `mode`, `state`, `link` (the way in use: `wifi` or `eth`), `links` (the ways the board
+has and answer), `eth` (`connected`, `state`, `ip`, `gateway`, `mask`, `dns`, `speed`,
+`fullDuplex`, `mac`; on the boards that look for a cable), `sta` (`connected`, only on the Wi-Fi,
+`ssid`, `ip`, `gateway`, `mask`, `dns`, `rssi`, `channel`, `mac`, `failures`), `ap` (`up`, `ssid`,
+`ip`, `clients`, `channel`, `captive`, `pswDefault`), `internet`, `internetChecked`, `mdns`,
+`host`, `join`, `scan`, `near`.
 
 | Command | Arguments | Notes |
 |---------|-----------|-------|
@@ -615,7 +633,8 @@ Document: `mode`, `state`, `sta` (`connected`, `ssid`, `ip`, `gateway`, `mask`, 
 | `test` | `ssid`, `psw?` | **(a)** tries the credentials for 30 s and keeps nothing. Only while the access point is up (state `ap` or `fallback`), otherwise `denied` |
 | `join` | `ssid`, `psw?` | **(c)** **(a)** moves the device to a network; `psw` empty for an open network, otherwise 8 to 63 characters |
 | `setAp` | `ssid?`, `psw?` | name and password of the access point, from the next restart; `psw` 8 to 63 characters |
-| `setMode` | `mode` | **(c)** `AP` or `LAN`. `LAN` is `denied` while no network was ever joined |
+| `setMode` | `mode` | **(c)** `AP` or `LAN`. `LAN` is `denied` while no network was ever joined, unless the cable is the way |
+| `setLink` | `link` | **(c)** `wifi` or `eth`: the way to the network. `eth` is `denied` (field `link`) on a board without a cable that answers; `cell` is `unsupported` |
 
 How the devices find each other is in
 [Discovery, MQTT and Home Assistant](network-and-home-assistant.md).

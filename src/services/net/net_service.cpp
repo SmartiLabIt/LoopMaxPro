@@ -78,6 +78,10 @@ constexpr ArgSpec kModeArgs[] = {
     Arg::str("mode", 2, 3),
 };
 
+constexpr ArgSpec kLinkArgs[] = {
+    Arg::str("link", 3, 4),
+};
+
 constexpr uint32_t bit(hal::NetEvent e) { return 1u << static_cast<uint8_t>(e); }
 
 // Milliseconds from since to now, read with their sign: a request that arrives during a
@@ -170,6 +174,11 @@ hal::Ip4 NetService::apAddress() const { return kApAddress; }
 
 hal::Ip4 NetService::address() const {
   if (!net_) return hal::Ip4();
+  if (state_ == NetState::Connected && link_) {
+    hal::LinkInfo link;
+    link_->info(link);
+    return link.ip;
+  }
   if (state_ == NetState::Connected) {
     hal::StaInfo sta;
     net_->staInfo(sta);
@@ -179,7 +188,8 @@ hal::Ip4 NetService::address() const {
 }
 
 int8_t NetService::signal() const {
-  if (!net_ || state_ != NetState::Connected) return 0;
+  // A cable has no signal to tell.
+  if (!net_ || link_ || state_ != NetState::Connected) return 0;
   hal::StaInfo sta;
   net_->staInfo(sta);
   return sta.rssi;
@@ -189,10 +199,17 @@ bool NetService::fromAccessPoint(const hal::Ip4& client) const {
   if (!net_ || !apUp_) return false;
   if (client == kApAddress || !sameNet(client, kApAddress, kApMask)) return false;
   // A network with the same addresses of the access point: nobody can tell who comes from where.
-  hal::StaInfo sta;
-  net_->staInfo(sta);
-  const bool onNetwork = sta.state == hal::StaState::Connected && sta.ip.isSet();
-  return !(onNetwork && sameNet(sta.ip, kApAddress, kApMask));
+  hal::Ip4 own;
+  if (link_) {
+    hal::LinkInfo link;
+    link_->info(link);
+    if (link.state == hal::LinkState::Connected) own = link.ip;
+  } else {
+    hal::StaInfo sta;
+    net_->staInfo(sta);
+    if (sta.state == hal::StaState::Connected) own = sta.ip;
+  }
+  return !(own.isSet() && sameNet(own, kApAddress, kApMask));
 }
 
 // ---------------------------------------------------------------- life cycle
@@ -223,6 +240,7 @@ Status NetService::start(Kernel& kernel) {
 #endif
   internet_ = internetKnown_ = false;
   probeArmed_ = false;
+  linkWaitArmed_ = false;
   takeEvents();
 
   const Status up = net_->init(kernel.config().sys.hostname.c_str());
@@ -231,6 +249,29 @@ Status NetService::start(Kernel& kernel) {
     return up;
   }
   net_->setEventHandler([this](hal::NetEvent e) { noteEvent(e); });
+
+  // The cable, on the boards that look for it: a chip that does not answer is not mounted. It is
+  // used when the settings choose it; chosen and not answering, the access point is the way in.
+  cable_ = kernel.board().cable;
+  cableFound_ = false;
+  link_ = nullptr;
+  if (cable_) {
+    const Status s = cable_->init(kernel.config().sys.hostname.c_str());
+    cableFound_ = s == Status::Ok;
+    if (s == Status::NotFound) {
+      LMP_LOGI(src_, "no cable chip on this board");
+    } else if (s != Status::Ok) {
+      LMP_LOGE(src_, "cable: %s", statusName(s));
+    }
+    cable_->setEventHandler([this](hal::NetEvent e) { noteEvent(e); });
+    if (strcmp(kernel.config().net.link.c_str(), hal::linkKindName(hal::LinkKind::Ethernet)) == 0) {
+      link_ = cable_;
+      if (!cableFound_) {
+        LMP_LOGE(src_, "the cable is chosen, and its chip does not answer");
+        degrade("the chip of the cable does not answer");
+      }
+    }
+  }
   nowMs_ = kernel.now();
   applyMode(nowMs_);
   return Status::Ok;
@@ -242,12 +283,29 @@ void NetService::stop() {
   if (apUp_) stopAp();
   dropClient();
   net_->setEventHandler(hal::NetEventHandler());
+  if (cable_) cable_->setEventHandler(hal::NetEventHandler());
   state_ = NetState::Off;
   join_ = JoinPhase::None;
 }
 
 void NetService::applyMode(uint32_t nowMs) {
   Config& config = kernel_->config();
+  if (link_) {
+    // The cable needs nothing to be set: LAN is that, AP the access point alone.
+    if (kernel_->mode() != Mode::Lan) {
+      if (state_ == NetState::ApOnly && apUp_) return;
+      dropClient();
+      apDownArmed_ = false;
+      state_ = NetState::ApOnly;
+      if (!apUp_) startAp();
+      return;
+    }
+    if (state_ != NetState::Off && state_ != NetState::ApOnly) return;   // already on its way
+    // An access point already up stays until a while after the address: who chose the cable
+    // from it can read where the device went.
+    startLink(nowMs);
+    return;
+  }
   if (kernel_->mode() == Mode::Lan && config.net.staSsid.empty()) {
     // Nothing to connect to: the device would be unreachable.
     LMP_LOGW(src_, "mode LAN without a network: back to the access point");
@@ -350,7 +408,12 @@ void NetService::connect(const Ssid& ssid, const Password& password, uint32_t no
 
 void NetService::dropClient() {
   const bool was = state_ == NetState::Connected;
-  if (was || attempting_) net_->staDisconnect();
+  if (link_) {
+    link_->stop();
+    linkWaitArmed_ = false;
+  } else if (was || attempting_) {
+    net_->staDisconnect();
+  }
   attempting_ = false;
   retryArmed_ = false;
   if (was) {
@@ -377,7 +440,12 @@ void NetService::scheduleRetry(uint32_t nowMs) {
 void NetService::enterFallback(uint32_t nowMs) {
   state_ = NetState::Fallback;
   if (join_ == JoinPhase::Reverting) join_ = JoinPhase::None;
-  LMP_LOGW(src_, "'%s' not reachable: access point up as a fallback", ssid_.c_str());
+  if (link_) {
+    LMP_LOGW(src_, "%s: no address, access point up as a fallback",
+             hal::linkKindName(link_->kind()));
+  } else {
+    LMP_LOGW(src_, "'%s' not reachable: access point up as a fallback", ssid_.c_str());
+  }
   if (!apUp_) startAp();
   kernel_->events().publish(Event(EventId::NetFallback));
   (void)nowMs;
@@ -386,13 +454,22 @@ void NetService::enterFallback(uint32_t nowMs) {
 void NetService::onConnected(uint32_t nowMs) {
   attempting_ = false;
   retryArmed_ = false;
+  linkWaitArmed_ = false;
   failures_ = 0;
   state_ = NetState::Connected;
 
-  hal::StaInfo sta;
-  net_->staInfo(sta);
-  LMP_LOGI(src_, "connected to '%s', address %u.%u.%u.%u, signal %d dBm", ssid_.c_str(),
-           sta.ip.b[0], sta.ip.b[1], sta.ip.b[2], sta.ip.b[3], static_cast<int>(sta.rssi));
+  if (link_) {
+    hal::LinkInfo link;
+    link_->info(link);
+    LMP_LOGI(src_, "%s connected, address %u.%u.%u.%u, %u Mbit/s", hal::linkKindName(link_->kind()),
+             link.ip.b[0], link.ip.b[1], link.ip.b[2], link.ip.b[3],
+             static_cast<unsigned>(link.speedMbps));
+  } else {
+    hal::StaInfo sta;
+    net_->staInfo(sta);
+    LMP_LOGI(src_, "connected to '%s', address %u.%u.%u.%u, signal %d dBm", ssid_.c_str(),
+             sta.ip.b[0], sta.ip.b[1], sta.ip.b[2], sta.ip.b[3], static_cast<int>(sta.rssi));
+  }
 
   if (join_ == JoinPhase::Trying) {
     joinAccepted(nowMs);
@@ -415,6 +492,38 @@ void NetService::onConnected(uint32_t nowMs) {
   }
   kernel_->events().publish(Event(EventId::NetStaConnected));
   armProbe(nowMs + kProbeFirstMs);
+}
+
+void NetService::armLinkWait(uint32_t nowMs) {
+  linkWaitArmed_ = true;
+  linkWaitAtMs_ = nowMs + static_cast<uint32_t>(LMP_NET_LINK_WAIT_SEC) * 1000u;
+}
+
+void NetService::startLink(uint32_t nowMs) {
+  failures_ = 0;
+  state_ = NetState::Connecting;
+  const Status s = link_->start();
+  if (s != Status::Ok) {
+    // A chip that does not answer: the access point is the way in, at once.
+    enterFallback(nowMs);
+    return;
+  }
+  LMP_LOGI(src_, "%s: waiting for an address", hal::linkKindName(link_->kind()));
+  armLinkWait(nowMs);
+  // An address that came before the events were listened to.
+  hal::LinkInfo link;
+  link_->info(link);
+  if (link.state == hal::LinkState::Connected && link.ip.isSet()) onConnected(nowMs);
+}
+
+void NetService::onLinkLost(uint32_t nowMs) {
+  LMP_LOGW(src_, "%s: address lost", hal::linkKindName(link_->kind()));
+  kernel_->events().publish(Event(EventId::NetStaLost));
+  state_ = NetState::Retrying;
+  probeArmed_ = false;
+  internetKnown_ = false;
+  internetIs(false);
+  armLinkWait(nowMs);
 }
 
 void NetService::onAttemptFailed(uint32_t nowMs, const char* why, hal::StaFail fail) {
@@ -480,6 +589,17 @@ void NetService::handleEvents(uint32_t events, uint32_t nowMs) {
     LMP_LOGD(src_, "access point: %u connected", static_cast<unsigned>(ap.clients));
   }
 
+  if (link_ && (events & (bit(hal::NetEvent::LinkGotIp) | bit(hal::NetEvent::LinkLost)))) {
+    // What counts is where the link is now, whatever the order of the events.
+    hal::LinkInfo link;
+    link_->info(link);
+    const bool up = link.state == hal::LinkState::Connected && link.ip.isSet();
+    const bool wanted = state_ != NetState::Off && state_ != NetState::ApOnly;
+    if (up && wanted && state_ != NetState::Connected) onConnected(nowMs);
+    if (!up && state_ == NetState::Connected) onLinkLost(nowMs);
+    return;
+  }
+
   const bool lost = (events & (bit(hal::NetEvent::StaLost) | bit(hal::NetEvent::StaFailed))) != 0;
   const bool gotAddress = (events & bit(hal::NetEvent::StaGotIp)) != 0;
   if (!lost && !gotAddress) return;
@@ -505,9 +625,17 @@ void NetService::tick(uint32_t nowMs) {
   if (!net_) return;
   nowMs_ = nowMs;
   net_->poll();
+  if (link_) link_->poll();
 
   const uint32_t events = takeEvents();
   if (events) handleEvents(events, nowMs);
+
+  // The cable or the modem without an address for too long: the access point is the way in,
+  // and the address is still waited for.
+  if (linkWaitArmed_ && reached(nowMs, linkWaitAtMs_)) {
+    linkWaitArmed_ = false;
+    if (state_ == NetState::Connecting || state_ == NetState::Retrying) enterFallback(nowMs);
+  }
 
   if (attempting_ && elapsed(nowMs, attemptStartMs_) > static_cast<int32_t>(kAttemptTimeoutMs)) {
     net_->staDisconnect();
@@ -557,7 +685,8 @@ void NetService::guardNetwork(uint32_t nowMs) {
   if (LMP_NET_GUARD_MIN == 0) return;
   // Lost: on the network by choice, a network configured, and not on it or without Internet
   // (a radio that stopped answering can look connected). A change of network is not a loss.
-  const bool wanted = kernel_->mode() == Mode::Lan && !ssid_.empty() && join_ == JoinPhase::None;
+  const bool wanted =
+      kernel_->mode() == Mode::Lan && (link_ || !ssid_.empty()) && join_ == JoinPhase::None;
   const bool lost = wanted && (state_ != NetState::Connected || (internetKnown_ && !internet_));
   if (!lost) {
     lostArmed_ = false;
@@ -983,6 +1112,53 @@ void NetService::onProbe(const HttpAnswer&) {}
 
 #endif
 
+// ---------------------------------------------------------------- way to the network
+
+Status NetService::changeLink(const char* name, CmdContext& ctx) {
+  if (join_ != JoinPhase::None) return Status::Busy;
+  bool cable;
+  if (strcmp(name, hal::linkKindName(hal::LinkKind::Wifi)) == 0) {
+    cable = false;
+  } else if (strcmp(name, hal::linkKindName(hal::LinkKind::Ethernet)) == 0) {
+    // Only a cable whose chip answered.
+    if (!cable_ || !cableFound_) {
+      ctx.errorField = "link";
+      return Status::Denied;
+    }
+    cable = true;
+  } else if (strcmp(name, hal::linkKindName(hal::LinkKind::Cellular)) == 0) {
+    ctx.errorField = "link";
+    return Status::Unsupported;   // the modem is not written yet
+  } else {
+    ctx.errorField = "link";
+    return Status::Invalid;
+  }
+
+  Config& config = kernel_->config();
+  if ((link_ != nullptr) == cable && strcmp(config.net.link.c_str(), name) == 0) return Status::Ok;
+  // The way in use is left; the new one starts from the beginning.
+  dropClient();
+  link_ = cable ? cable_ : nullptr;
+  state_ = NetState::Off;
+  failures_ = 0;
+  // The cable needs nothing more; the Wi-Fi goes back to its network, or to the access point.
+  const Mode mode = cable || !config.net.staSsid.empty() ? Mode::Lan : Mode::Ap;
+  config.net.link.assign(name);
+  config.sys.mode = mode == Mode::Lan ? 2 : 1;
+  config.touch(Config::kNet);
+  config.touch(Config::kSys);
+  const Status saved = config.save();
+  if (saved != Status::Ok) LMP_LOGE(src_, "way to the network not saved: %s", statusName(saved));
+  LMP_LOGI(src_, "way to the network: %s", name);
+  kernel_->events().publish(Event(EventId::ConfigChanged, Config::kNet));
+  if (kernel_->mode() != mode) {
+    kernel_->setMode(mode);   // the change of mode applies it
+  } else {
+    applyMode(kernel_->now());
+  }
+  return Status::Ok;
+}
+
 // ---------------------------------------------------------------- documents and commands
 
 bool NetService::usingDefaultApPassword() const {
@@ -1009,11 +1185,42 @@ void NetService::describe(JsonWriter& w) const {
 
   w.str("mode", modeName(kernel_->mode()));
   w.str("state", netStateName(state_));
+  // The way in use, the ones the board has, and the cable in its object: on the boards that
+  // look for one, when its chip answers or when it is chosen.
+  w.str("link", hal::linkKindName(link()));
+  w.beginArray("links");
+  w.str(hal::linkKindName(hal::LinkKind::Wifi));
+  if (cable_ && cableFound_) w.str(hal::linkKindName(cable_->kind()));
+  w.endArray();
+  const bool onCable = link_ && state_ == NetState::Connected;
+  if (cable_ && (cableFound_ || link_)) {
+    hal::LinkInfo link;
+    hal::Mac linkMac;
+    cable_->info(link);
+    cable_->mac(linkMac);
+    w.beginObject(hal::linkKindName(cable_->kind()));
+    w.boolean("connected", onCable);
+    w.str("state", hal::linkStateName(link.state));
+    if (onCable) {
+      writeIp(w, "ip", link.ip);
+      writeIp(w, "gateway", link.gateway);
+      writeIp(w, "mask", link.mask);
+      writeIp(w, "dns", link.dns);
+    }
+    if (link.speedMbps) {
+      w.u32("speed", link.speedMbps);
+      w.boolean("fullDuplex", link.fullDuplex);
+    }
+    linkMac.toString(text, sizeof(text));
+    w.str("mac", text);
+    w.endObject();
+  }
 
+  const bool onWifi = !link_ && state_ == NetState::Connected;
   w.beginObject("sta");
-  w.boolean("connected", state_ == NetState::Connected);
-  w.str("ssid", state_ == NetState::ApOnly ? "" : ssid_.c_str());
-  if (state_ == NetState::Connected) {
+  w.boolean("connected", onWifi);
+  w.str("ssid", state_ == NetState::ApOnly || link_ ? "" : ssid_.c_str());
+  if (onWifi) {
     writeIp(w, "ip", sta.ip);
     writeIp(w, "gateway", sta.gateway);
     writeIp(w, "mask", sta.mask);
@@ -1152,9 +1359,10 @@ void NetService::commands(CommandSet& set) {
           kCmdAsync);
 #endif
 
+  // A device on a cable or a modem does not join a Wi-Fi network.
   set.add("test", LMP_HELP("Tries the credentials of a network and keeps nothing"), kJoinArgs,
           [this](const Args& a, CmdContext& ctx) -> Status {
-            if (!net_) return Status::Unsupported;
+            if (!net_ || link_) return Status::Unsupported;
             return beginJoin(a.str("ssid"), a.str("psw"), true, ctx);
           },
           kCmdAsync);
@@ -1163,7 +1371,7 @@ void NetService::commands(CommandSet& set) {
           LMP_HELP("Moves the device to a network. Goes back by itself when it does not work"),
           kJoinArgs,
           [this](const Args& a, CmdContext& ctx) -> Status {
-            if (!net_) return Status::Unsupported;
+            if (!net_ || link_) return Status::Unsupported;
             return beginJoin(a.str("ssid"), a.str("psw"), false, ctx);
           },
           kCmdConfirm | kCmdAsync);
@@ -1180,6 +1388,15 @@ void NetService::commands(CommandSet& set) {
             return Status::Ok;
           });
 
+  set.add("setLink",
+          LMP_HELP("The way to the network: wifi, or eth, a cable, where the board has one"),
+          kLinkArgs,
+          [this](const Args& a, CmdContext& ctx) -> Status {
+            if (!net_) return Status::Unsupported;
+            return changeLink(a.str("link"), ctx);
+          },
+          kCmdConfirm);
+
   set.add("setMode", LMP_HELP("AP: access point. LAN: client of the configured network"), kModeArgs,
           [this](const Args& a, CmdContext& ctx) -> Status {
             if (join_ != JoinPhase::None) return Status::Busy;
@@ -1194,7 +1411,7 @@ void NetService::commands(CommandSet& set) {
               return Status::Invalid;
             }
             Config& config = kernel_->config();
-            if (mode == Mode::Lan && config.net.staSsid.empty()) {
+            if (mode == Mode::Lan && !link_ && config.net.staSsid.empty()) {
               // No network was ever accepted: join gives one.
               ctx.errorField = "mode";
               return Status::Denied;

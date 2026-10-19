@@ -41,6 +41,9 @@ struct NetConfig {
   bool captive;
   uint16_t rollbackSec;
   FixedString<96> probeUrl;    // used to check that Internet is reachable
+  // The way to the network chosen among the ones the board has: "wifi", "eth" (a cable) or
+  // "cell" (a modem). Changed only by sys.net setLink, which checks the board has it.
+  FixedString<8> link;
 };
 
 struct WebConfig {

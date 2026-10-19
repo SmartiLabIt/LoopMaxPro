@@ -30,6 +30,7 @@
 #include "hal/api/board.h"
 #include "hal/common/lora_wiring.h"
 #include "hal/esp32/esp32_board.h"
+#include "hal/esp32/esp32_eth.h"
 #include "hal/esp32/esp32_http.h"
 #include "hal/esp32/esp32_net.h"
 #include "hal/esp32/esp32_online.h"
@@ -458,6 +459,9 @@ struct Objects {
 #if LMP_FEATURE_PROBE
   NetProbe probe;
 #endif
+#if LMP_FEATURE_NET && ((LMP_NET_LINKS) & LMP_NET_LINK_ETH)
+  Eth eth;
+#endif
 };
 
 Objects& objects() {
@@ -546,6 +550,10 @@ const Board& board() {
 #endif
 #if LMP_FEATURE_PROBE
     x.probe = &o.probe;
+#endif
+#if LMP_FEATURE_NET && ((LMP_NET_LINKS) & LMP_NET_LINK_ETH)
+    x.cable = &o.eth;
+    x.caps.add(Cap::Ethernet);
 #endif
 #if LMP_FEATURE_BUS
     x.i2c[0] = &o.i2c0;

@@ -191,6 +191,11 @@ export function moduleCtx(name) {
     sysRead: (sysTarget, cmd, args) => (isSys(sysTarget)
       ? command(sysTarget, cmd, args, { background: true })
       : Promise.resolve({ ok: false, status: 'denied', field: '', result: {} })),
+    // A command of the system that changes something, for a module that offers it among its
+    // settings: it blocks and says how it went, as act() does.
+    sysAct: (sysTarget, cmd, args, okText) => (isSys(sysTarget)
+      ? act(sysTarget, cmd, args, okText)
+      : Promise.resolve({ ok: false, status: 'denied', field: '', result: {} })),
     // True when the firmware has that service: 'mqtt', 'cloud'. The report says it.
     hasService: (service) => ((store.get().report || {}).services || [])
       .some((x) => x.name === service),
