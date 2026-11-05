@@ -16,7 +16,7 @@ A free module for <a href="../../../README.md">LoopMaxPro</a></p>
 <h2 id="overview"><img src="../../../docs/assets/h/overview.svg" alt="Overview" height="24"></h2>
 
 <p align="center">
-<img src="docs/how-it-works.svg" alt="How Zappy 1 works: one relay input is driven by one board pin; Zappy 1 adds the relay channel, while LoopMaxPro provides its name, schedules, local console and system services" width="900">
+<img src="docs/how-it-works.svg?v=018dc4f" alt="How Zappy 1 works: one relay input is driven by one board pin; Zappy 1 adds the relay channel, while LoopMaxPro provides its name, schedules, local console and system services" width="900">
 </p>
 
 Zappy 1 controls one relay: for example, a lamp, socket, pump or valve. Give the channel a name,
