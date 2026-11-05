@@ -1,0 +1,4 @@
+# LoopMaxPro - ESP32-C3 4 MB with ESP-IDF, console on the UART bridge of the board.
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions/esp32_4mb.csv"
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y

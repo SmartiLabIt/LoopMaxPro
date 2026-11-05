@@ -1,0 +1,14 @@
+{
+  "name": "demo",
+  "kind": "hardware",
+  "title": "Demo",
+  "version": "1.0.0",
+  "icon": "🧪",
+  "uiApi": 1,
+  "ui": "ui/demo.js",
+  "sources": ["src"],
+  "params": { "pins": [22, 23], "button": -1 },
+  "requires": ["gpio", "config"],
+  "optional": ["clock"],
+  "online": []
+}

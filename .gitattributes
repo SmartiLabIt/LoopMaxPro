@@ -1,0 +1,3 @@
+# Every file is stored byte for byte, with the line endings it has (LF): the release tool
+# takes the fingerprint of the sources, and a converted line ending is a changed file.
+* -text

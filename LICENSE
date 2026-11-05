@@ -1,0 +1,61 @@
+LoopMaxPro - Personal and Hobby Use License
+
+Copyright (c) 2026 SmartiLab (https://smartilab.it). All rights reserved.
+
+1. What you may do
+
+   For PERSONAL and HOBBY purposes only, without payment and without any
+   commercial advantage, you may:
+
+   - download, build, study and use this software, on devices of your own;
+   - change it;
+   - share it with others and publish your changes, as source or as a
+     compiled firmware, on these conditions:
+       a) nothing is asked in return, in any form;
+       b) this license and the copyright notices stay with it, unchanged;
+       c) you say clearly that it comes from LoopMaxPro of SmartiLab, with a
+          link to the official repository
+          (https://github.com/SmartiLabIt/LoopMaxPro), and what you changed;
+       d) who receives it gets it under this same license, and nothing more.
+
+2. What you may not do
+
+   COMMERCIAL USE IS FORBIDDEN, IN ANY FORM AND IN ANY VARIANT.
+
+   Without a written license from SmartiLab you may not, in particular:
+
+   - sell, rent, lease or license this software, a part of it or a work
+     derived from it;
+   - sell, supply or give away for a commercial purpose devices, kits,
+     products or services that contain it, run it or depend on it;
+   - use it in the activity of a company, of a professional or of any
+     organisation, for customers or for internal purposes, with or without
+     payment;
+   - offer it as a hosted or managed service, or take payment to install it,
+     to adapt it or to maintain it;
+   - distribute it, or a work derived from it, under terms other than these;
+   - remove or alter this license or the copyright notices.
+
+3. Names
+
+   "LoopMax", "LoopMaxPro" and "SmartiLab", with their logos, belong to
+   SmartiLab. This license gives no right to use them, except to say truthfully
+   where a personal project comes from, as point 1 asks.
+
+4. Code of others
+
+   Parts of this repository are the work of others and keep their own license:
+   they are listed in THIRD-PARTY.md. The frameworks and the libraries that the
+   build downloads have the licenses of their authors.
+
+5. No warranty
+
+   This software is provided "AS IS", without warranty of any kind, express or
+   implied, including but not limited to the warranties of merchantability, of
+   fitness for a particular purpose and of noninfringement. In no event shall
+   the authors or the copyright holders be liable for any claim, damages or
+   other liability arising from the software or from its use.
+
+6. Commercial licenses
+
+   For any use this license does not allow, ask SmartiLab: https://smartilab.it

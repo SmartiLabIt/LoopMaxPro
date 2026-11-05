@@ -1,0 +1,71 @@
+{
+  "name": "zappy1ch",
+  "kind": "hardware",
+  "title": "Zappy 1CH",
+  "version": "1.0.0",
+  "icon": "🔌",
+  "uiApi": 1,
+  "params": {
+    "pins": [
+      -1
+    ]
+  },
+  "requires": [
+    "gpio",
+    "config"
+  ],
+  "optional": [
+    "clock"
+  ],
+  "online": [],
+  "pinParams": {
+    "pins": [
+      "Line 1"
+    ]
+  },
+  "families": [
+    "esp32",
+    "esp8266"
+  ],
+  "boardPins": {
+    "esp32": {
+      "pins": [
+        22
+      ]
+    },
+    "esp32s2": {
+      "pins": [
+        5
+      ]
+    },
+    "esp32s3": {
+      "pins": [
+        5
+      ]
+    },
+    "esp32c3": {
+      "pins": [
+        5
+      ]
+    },
+    "esp32c6": {
+      "pins": [
+        5
+      ]
+    },
+    "esp8266": {
+      "pins": [
+        12
+      ]
+    },
+    "native": {
+      "pins": [
+        4
+      ]
+    }
+  },
+  "defaultBoard": "esp32dev",
+  "sources": [
+    "src"
+  ]
+}
