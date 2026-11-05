@@ -19,7 +19,7 @@
 <rect x="436" y="142" width="348" height="172" rx="12" fill="#eaf8ef" stroke="#22a35a" stroke-width="2"/>
 <text x="452" y="172" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#166534" text-anchor="start">Zappy 1</text>
 <text x="533.4" y="172" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#475569" text-anchor="start">its own part</text>
-<text x="452" y="200" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#0f172a" text-anchor="start">one pin and one channel</text>
+<text x="452" y="200" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#0f172a" text-anchor="start">which pin and one channel</text>
 <text x="452" y="221" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#0f172a" text-anchor="start">no page of its own: the console draws</text>
 <text x="452" y="242" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#0f172a" text-anchor="start">it from what the module publishes</text>
 <text x="452" y="263" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#0f172a" text-anchor="start">one short file of code</text>
@@ -36,17 +36,17 @@
 <text x="483" y="422.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#3730a3" text-anchor="middle">clock</text>
 <rect x="521" y="405" width="70" height="26" rx="13" fill="#ffffff" stroke="#6366f1" stroke-width="1.6"/>
 <text x="556" y="422.55" font-family="Cascadia Mono, Consolas, Menlo, monospace" font-size="13" font-weight="600" fill="#3730a3" text-anchor="middle">config</text>
-<text x="452" y="455" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">a name, state restore after a power</text>
-<text x="452" y="474" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">cut, four schedules for the channel</text>
+<text x="452" y="455" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">the name, state after a power cut,</text>
+<text x="452" y="474" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">four schedules for the channel</text>
 <text x="452" y="498" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="start">network, settings, clock, console, updates: already there</text>
 <path d="M416 172 L346 172" fill="none" stroke="#475569" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#m475569)"/>
 <text x="380" y="163" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13" font-weight="700" fill="#334155" text-anchor="middle" stroke="#ffffff" stroke-width="5" paint-order="stroke" stroke-linejoin="round">1 pin</text>
 <text x="880" y="112" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="12.5" font-weight="700" fill="#475569" text-anchor="start">HOW YOU USE IT</text>
 <rect x="880" y="126" width="280" height="66" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
 <text x="894" y="152" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start">Web console</text>
-<text x="894" y="173" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">Device ? Schedules ? Info</text>
+<text x="894" y="173" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">Device · Schedules · Info</text>
 <rect x="880" y="204" width="280" height="66" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
-<text x="894" y="230" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start">HTTP API ? serial ? MQTT</text>
+<text x="894" y="230" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#0f172a" text-anchor="start">HTTP API · serial · MQTT</text>
 <text x="894" y="251" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="400" fill="#0f172a" text-anchor="start">the same commands: set, toggle, all ...</text>
 <rect x="880" y="282" width="280" height="84" rx="12" fill="#e6f9fc" stroke="#06b6d4" stroke-width="2"/>
 <text x="894" y="308" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="15.5" font-weight="700" fill="#0e7490" text-anchor="start">Home Assistant</text>
