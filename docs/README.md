@@ -39,7 +39,7 @@ The free modules have their own pages:
 [GanjaLeaf](../src/modules/ganjaleaf/README.md),
 [MeteoWifi](../src/modules/meteowifi/README.md),
 [RGB Controller](../src/modules/rgb/README.md),
-[Zappy 1CH](../src/modules/zappy1ch/README.md),
+[Zappy 1](../src/modules/zappy1ch/README.md),
 [Zappy 2](../src/modules/zappy2/README.md).
 
 ## Around the device

@@ -277,7 +277,7 @@ Remove-Item Env:LMP_MODULES
 
 | Module | Name in the build | Parameters |
 |--------|-------------------|------------|
-| [Zappy 1CH](../src/modules/zappy1ch/README.md) | `zappy1ch` | `pins`: the relay line |
+| [Zappy 1](../src/modules/zappy1ch/README.md) | `zappy1ch` | `pins`: the relay line |
 | [Zappy 2](../src/modules/zappy2/README.md) | `zappy2` | `pins`: the two lines |
 | [RGB Controller](../src/modules/rgb/README.md) | `rgb` | `pins`: red, green, blue |
 | [GanjaLeaf](../src/modules/ganjaleaf/README.md) | `ganjaleaf` | `leaf`: red, green, blue; `ring`: the pin of the LED ring; `leds`: how many LEDs, 12 |

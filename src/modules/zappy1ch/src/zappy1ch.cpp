@@ -1,4 +1,4 @@
-// LoopMaxPro - Zappy 1CH: one relay with a name and schedules.
+// LoopMaxPro - Zappy 1: one relay with a name and schedules.
 #include "sdk/module.h"
 #include "sdk/pin_bank.h"
 #include "sdk/pin_schedule.h"
@@ -12,8 +12,8 @@ namespace {
 
 constexpr uint8_t kChannels = 1;
 
-class Zappy1CH final : public lmp::sdk::Module {
-  LMP_MODULE("zappy1ch", "Zappy 1CH", "\xF0\x9F\x94\x8C", "1.0.0", lmp::sdk::ModuleKind::Hardware, 50)
+class Zappy1 final : public lmp::sdk::Module {
+  LMP_MODULE("zappy1ch", "Zappy 1", "\xF0\x9F\x94\x8C", "1.0.0", lmp::sdk::ModuleKind::Hardware, 50)
 
  public:
   lmp::Status onInit(lmp::sdk::ModuleContext& c) override {
@@ -39,4 +39,4 @@ class Zappy1CH final : public lmp::sdk::Module {
 
 }  // namespace
 
-LMP_REGISTER_MODULE(zappy1ch, Zappy1CH)
+LMP_REGISTER_MODULE(zappy1ch, Zappy1)

@@ -64,7 +64,7 @@ The modules in this repository:
 
 | Module | Kind | What it is | Look at it for |
 |--------|------|------------|----------------|
-| [Zappy 1CH](../src/modules/zappy1ch/README.md) | `hardware` | One relay with a name and schedules | The same SDK parts as Zappy 2, for one channel |
+| [Zappy 1](../src/modules/zappy1ch/README.md) | `hardware` | One relay with a name and schedules | The same SDK parts as Zappy 2, for one channel |
 | [Zappy 2](../src/modules/zappy2/README.md) | `hardware` | Two relays with names and schedules | The smallest real module: two parts of the SDK and one function |
 | [RGB Controller](../src/modules/rgb/README.md) | `hardware` | An analog RGB strip on three PWM pins | The lights of the SDK and their shared interface |
 | [GanjaLeaf](../src/modules/ganjaleaf/README.md) | `hardware` | An RGB strip and a ring of addressable LEDs | Two lights, each with its own schedules |
@@ -77,7 +77,7 @@ The modules in this repository:
 
 | Kind | In C++ | For | Here |
 |------|--------|-----|------|
-| `hardware` | `ModuleKind::Hardware` | Pins, PWM, analog inputs | Zappy 1CH, Zappy 2, RGB Controller, GanjaLeaf, demo |
+| `hardware` | `ModuleKind::Hardware` | Pins, PWM, analog inputs | Zappy 1, Zappy 2, RGB Controller, GanjaLeaf, demo |
 | `bridge` | `ModuleKind::Bridge` | Hardware outside the board, or other devices | – |
 | `online` | `ModuleKind::Online` | Services on the network | MeteoWifi, ExpNet, EspRadio |
 | `ui` | `ModuleKind::Ui` | Something that lives in the browser, with no code on the device | – |
