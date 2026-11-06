@@ -71,6 +71,10 @@ the console or with the command `invert`.
 A relay that switches mains voltage must be wired by someone qualified to do it safely. Never
 connect mains voltage to a GPIO.
 
+<p align="center">
+<img src="docs/Circuit.png" alt="Wiring diagram: an ESP32 board drives a one-channel relay on GPIO 22; the relay switches one load" width="520">
+</p>
+
 ### Pins
 
 The pin of each board is in `boardPins` of [module.json](module.json); a pin given in the build

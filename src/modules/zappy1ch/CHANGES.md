@@ -1,4 +1,4 @@
-# Zappy 1: versions
+# Zappy 1CH: versions
 
 What each version fixes and adds. The newest on top. Written in English: the notes are
 shown as they are, in the console and on the server.
