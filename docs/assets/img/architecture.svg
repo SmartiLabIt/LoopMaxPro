@@ -20,7 +20,7 @@
 <rect x="572" y="142" width="126" height="28" rx="14" fill="#ffffff" stroke="#22a35a" stroke-width="1.6"/>
 <text x="635" y="160.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">RGB Controller</text>
 <rect x="214" y="178" width="89" height="28" rx="14" fill="#ffffff" stroke="#22a35a" stroke-width="1.6"/>
-<text x="258.5" y="196.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">Zappy 1</text>
+<text x="258.5" y="196.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">Zappy 1CH</text>
 <rect x="311" y="178" width="74" height="28" rx="14" fill="#ffffff" stroke="#22a35a" stroke-width="1.6"/>
 <text x="348" y="196.725" font-family="Segoe UI, system-ui, -apple-system, Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#166534" text-anchor="middle">Zappy 2</text>
 <rect x="214" y="178" width="119" height="28" rx="14" fill="#fff3ea" stroke="#f97316" stroke-width="1.6" stroke-dasharray="5 4"/>

@@ -71,7 +71,7 @@ The free modules of this repository. Each one has its page, with hardware, build
 | [GanjaLeaf](src/modules/ganjaleaf/README.md) | A lamp in the shape of a leaf: an RGB strip and a ring of LEDs |
 | [MeteoWifi](src/modules/meteowifi/README.md) | The weather of your town, in the console and on a small display |
 | [RGB Controller](src/modules/rgb/README.md) | An analog RGB LED strip with colours, effects and schedules |
-| [Zappy 1](src/modules/zappy1ch/README.md) | One relay with a name and schedules |
+| [Zappy 1CH](src/modules/zappy1ch/README.md) | One relay with a name and schedules |
 | [Zappy 2](src/modules/zappy2/README.md) | Two relays with schedules |
 
 Each of them can be installed from the browser, without a build, with the

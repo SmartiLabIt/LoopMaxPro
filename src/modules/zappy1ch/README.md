@@ -18,7 +18,7 @@ A free module for <a href="../../../README.md">LoopMaxPro</a></p>
 <h2 id="overview"><img src="../../../docs/assets/h/overview.svg" alt="Overview" height="24"></h2>
 
 <p align="center">
-<img src="docs/how-it-works.svg?v=2" alt="How Zappy 1 works: one board pin drives one relay; LoopMaxPro provides the channel name, schedules, console and system services; it is used from the web console, HTTP API, serial console, MQTT and Home Assistant" width="900">
+<img src="docs/how-it-works.svg" alt="How Zappy 1 works: one board pin drives one relay; LoopMaxPro provides the channel name, schedules, console and system services; it is used from the web console, HTTP API, serial console, MQTT and Home Assistant" width="900">
 </p>
 
 Zappy 1 commands one relay: a socket, a lamp, a pump or a valve. The channel has its own name
